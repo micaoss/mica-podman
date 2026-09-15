@@ -1,0 +1,33 @@
+name: ci
+# Every push to main and pull request builds, packs and gates both
+# architectures; nothing is published. Only pushes to main save the engine
+# compile caches; pull requests restore them. Weekly, the upstream pins are checked.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: '17 6 * * 1'
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+jobs:
+  build:
+    if: github.event_name != 'schedule'
+    uses: ./.github/workflows/build.yml
+    with:
+      save-cache: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+  pin-freshness:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - name: Pin check against recorded upstream responses
+        run: make podman-pins-test
+      - name: Ask the six upstreams for their newest release
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: make podman-pins

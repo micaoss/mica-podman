@@ -1,0 +1,17 @@
+[Unit]
+Description=Quadlet unit directory on DATA/state
+# Quadlet reads only /run, /etc and /usr/share/containers/systemd; /etc is the
+# operator's and is read-only without this bind. Enabled by mica-core from
+# container.enabled, never statically.
+Requires=mica-seed-state.service
+After=mica-seed-state.service
+RequiresMountsFor=/mnt/data/state /mica/containers
+
+[Mount]
+What=/mnt/data/state/quadlet
+Where=/etc/containers/systemd
+Type=none
+Options=bind
+
+[Install]
+WantedBy=local-fs.target

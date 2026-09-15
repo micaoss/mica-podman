@@ -1,0 +1,9 @@
+# mica-lock v1
+# The container engine from these upstream trees. The 5.x podman line is deliberate (upstream also maintains 6.x);
+# netavark and aardvark-dns move together (2.x requires glibc). A pin moves by setting the tag and its commit.
+git	aardvark-dns	https://github.com/containers/aardvark-dns.git	v2.1.0	cd7417681229219059939bdd9f0b3bd9ac9abb08
+git	catatonit	https://github.com/openSUSE/catatonit.git	v0.2.1	bb3b96b99668e544618c5aec427c1f4b6b9ee9bb
+git	conmon	https://github.com/containers/conmon.git	v2.2.1	c8cc2c4db27531bd4e084ce7857f73cd21ee639d
+git	crun	https://github.com/containers/crun.git	1.29.1	f0d911de5587342cfeb16473bf32ecdfeaf25957
+git	netavark	https://github.com/containers/netavark.git	v2.1.0	8e91ad1d947ed325327b638f0cb906bea1f7d0ab
+git	podman	https://github.com/containers/podman.git	v5.8.6	a859fc66702c23e869c282c63e92d9b6cd264229

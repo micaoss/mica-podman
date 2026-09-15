@@ -1,0 +1,34 @@
+# The payload of mica-podman: <mode> <d|f|l> <path> [-> <target>].
+# deb/Dockerfile refuses any difference from the staged tree.
+0644 f /etc/containers/containers.conf
+0644 f /etc/containers/policy.json
+0644 f /etc/containers/registries.conf
+0644 f /etc/containers/storage.conf
+0644 f /etc/systemd/system/etc-containers-systemd.mount
+0644 f /usr/share/doc/mica-podman/copyright
+0644 f /usr/share/mica-podman/upstream.lock
+0755 d /etc
+0755 d /etc/containers
+0755 d /etc/containers/systemd
+0755 d /etc/systemd
+0755 d /etc/systemd/system
+0755 d /usr
+0755 d /usr/bin
+0755 d /usr/lib
+0755 d /usr/lib/systemd
+0755 d /usr/lib/systemd/system-generators
+0755 d /usr/libexec
+0755 d /usr/libexec/podman
+0755 d /usr/share
+0755 d /usr/share/doc
+0755 d /usr/share/doc/mica-podman
+0755 d /usr/share/mica-podman
+0755 f /usr/bin/crun
+0755 f /usr/bin/podman
+0755 f /usr/libexec/podman/aardvark-dns
+0755 f /usr/libexec/podman/catatonit
+0755 f /usr/libexec/podman/conmon
+0755 f /usr/libexec/podman/netavark
+0755 f /usr/libexec/podman/quadlet
+0777 l /usr/bin/docker -> podman
+0777 l /usr/lib/systemd/system-generators/podman-system-generator -> ../../../libexec/podman/quadlet

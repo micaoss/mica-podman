@@ -1,0 +1,176 @@
+[
+ {
+  "tag_name": "v2.1.0",
+  "published_at": "2026-08-06T13:44:50Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v2.0.0",
+  "published_at": "2026-06-10T16:01:26Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v1.17.1",
+  "published_at": "2026-04-07T17:01:56Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v1.17.0",
+  "published_at": "2025-11-12T15:18:45Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v1.16.0",
+  "published_at": "2025-08-14T18:15:21Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v1.15.0",
+  "published_at": "2025-05-13T15:32:43Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v1.14.0",
+  "published_at": "2025-02-10T14:28:53Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v1.13.1",
+  "published_at": "2024-11-06T17:17:44Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v1.13.0",
+  "published_at": "2024-10-29T18:25:58Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v1.10.1-rhel",
+  "published_at": "2024-09-25T08:26:28Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v1.12.2",
+  "published_at": "2024-09-04T13:54:54Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v1.12.1",
+  "published_at": "2024-08-01T18:40:35Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v1.12.0",
+  "published_at": "2024-08-01T15:35:11Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v1.11.0",
+  "published_at": "2024-05-30T15:32:41Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v1.10.0",
+  "published_at": "2024-01-24T20:58:35Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v1.9.0",
+  "published_at": "2023-11-27T14:18:07Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v1.8.0",
+  "published_at": "2023-09-27T18:33:06Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v1.7.0",
+  "published_at": "2023-06-29T13:53:19Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v1.6.0",
+  "published_at": "2023-04-12T01:51:30Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v1.5.0",
+  "published_at": "2023-02-02T13:24:34Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v1.4.0",
+  "published_at": "2022-12-07T19:32:54Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v1.3.0",
+  "published_at": "2022-11-10T20:10:28Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v1.2.0",
+  "published_at": "2022-09-27T18:22:46Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v1.1.0",
+  "published_at": "2022-07-27T17:27:02Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v1.0.3",
+  "published_at": "2022-05-05T19:55:19Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v1.0.2",
+  "published_at": "2022-03-23T20:38:06Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v1.0.1",
+  "published_at": "2022-02-24T20:02:42Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v1.0.0",
+  "published_at": "2022-02-16T20:41:43Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v1.0.0-rc2",
+  "published_at": "2022-02-10T21:45:09Z",
+  "prerelease": true,
+  "draft": false
+ }
+]

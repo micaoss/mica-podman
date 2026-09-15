@@ -1,0 +1,18 @@
+Package: mica-podman
+Version: @VERSION@
+Architecture: @ARCH@
+Maintainer: Mica OS <hi@micaos.dev>
+Section: admin
+Priority: optional
+Depends: mica-system, nftables, libsystemd0, ${shlibs:Depends}
+Description: Mica OS container engine
+ podman and quadlet 5.8.6, crun 1.29.1, conmon 2.2.1, netavark and
+ aardvark-dns 2.1.0 and catatonit 0.2.1, built from pinned upstream source,
+ with the Quadlet system generator, the /etc/containers configuration and the
+ Quadlet unit directory mount. /usr/bin/docker is an alias of podman; there is
+ no Docker daemon or socket.
+ .
+ No unit is enabled: mica-core enables etc-containers-systemd.mount from the
+ container.enabled setting. netavark execs nft, and podman dlopens libsystemd
+ for journald logging, so both are declared explicitly. mica-system provides
+ the /mica/containers and state mounts the configuration uses.

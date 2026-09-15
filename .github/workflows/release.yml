@@ -1,0 +1,49 @@
+name: release
+# Runs only when a release is published; nothing here runs on a push. The
+# release is cut first with `gh release create <YYYYMMDD-HHMM> --target <commit
+# of main>`. The release's tag is checked, packed and gated for both
+# architectures, then tools/release.sh pushes those archives as the pools
+# ghcr.io/micaoss/mica-podman:pool.<arch>.<tag>, reads them back with no
+# credential, and attaches exactly mica-podman.lock and SHA256SUMS to that release.
+on:
+  release:
+    types: [published]
+permissions:
+  contents: read
+concurrency:
+  group: release-${{ github.event.release.tag_name }}
+  cancel-in-progress: false
+jobs:
+  build:
+    uses: ./.github/workflows/build.yml
+    with:
+      ref: refs/tags/${{ github.event.release.tag_name }}
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: refs/tags/${{ github.event.release.tag_name }}
+          fetch-depth: 0
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: mica-podman-*
+          path: _out/artifacts
+      - name: The gated archives of this run
+        run: |
+          set -euo pipefail
+          for arch in amd64 arm64; do
+            mkdir -p "_out/debs/$arch"
+            cp -r "_out/artifacts/mica-podman-$arch/." "_out/debs/$arch/"
+          done
+          rm -rf _out/artifacts
+          bash tests/package-gate.sh
+      - name: Publish the pools and the release assets, read back anonymously
+        run: bash tools/release.sh "$TAG"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.event.release.tag_name }}
