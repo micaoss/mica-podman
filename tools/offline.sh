@@ -25,6 +25,7 @@ done
 [ "$(git rev-parse HEAD)" = "${COMMIT}" ] || die "HEAD moved during the build"
 
 echo "offline.sh: built ${COMMIT}"
+echo "offline.sh: warning: no release was compared, so the inputs guard (tools/reuse.sh) was not applied to mica-podman $(bash tools/version.sh version)" >&2
 for arch in amd64 arm64; do
     dist="${REPO_ROOT}/_out/debs/${arch}"
     [ -s "${dist}/Packages" ] && [ -s "${dist}/SHA256SUMS" ] && (cd "${dist}" && sha256sum --quiet -c SHA256SUMS) ||

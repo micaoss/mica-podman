@@ -26,7 +26,7 @@ pass() { PASS_N=$((PASS_N + 1)); echo "PASS: $*"; }
 fail() { FAIL_N=$((FAIL_N + 1)); echo "FAIL: $*"; }
 check() { local label="$1"; shift; if "$@"; then pass "${label}"; else fail "${label}"; fi; }
 
-COMMIT="$(git rev-parse HEAD)"
+DECLARED="$(bash tools/version.sh version)"
 SOURCE_REPO="$(basename "$(git remote get-url origin)" .git)"
 MAINTAINER='Mica OS <hi@micaos.dev>'
 WORK="$(mktemp -d "${REPO_ROOT}/_out/package-gate.XXXXXX")"
@@ -50,11 +50,10 @@ for arch in "${ARCHES[@]}"; do
     VERSIONS+=("${v}")
     check "${arch}: file name is Package_Version_Architecture" [ "$(basename "${deb}")" = "mica-podman_${v}_${arch}.deb" ]
     check "${arch}: Package mica-podman, Architecture ${arch}" [ "$(field Package)/$(field Architecture)" = "mica-podman/${arch}" ]
-    check "${arch}: Version ${v} is <upstream>+git<commit12>-1 of HEAD" \
-        bash -c '[[ "$1" =~ ^[0-9][0-9.]*\+git$2(\.dirty)?-1$ ]]' _ "${v}" "${COMMIT:0:12}"
+    check "${arch}: Version ${v} is the version deb/mica-podman.control declares" [ "${v}" = "${DECLARED}" ]
     check "${arch}: Maintainer ${MAINTAINER}" [ "$(field Maintainer)" = "${MAINTAINER}" ]
-    check "${arch}: Mica-Source-Repo ${SOURCE_REPO}, Mica-Source-Commit HEAD" \
-        [ "$(field Mica-Source-Repo)/$(field Mica-Source-Commit)" = "${SOURCE_REPO}/${COMMIT}" ]
+    check "${arch}: Mica-Source-Repo ${SOURCE_REPO}, no commit or epoch field" \
+        [ "$(field Mica-Source-Repo)/$(field Mica-Source-Commit)$(field X-Mica-Source-Date-Epoch)" = "${SOURCE_REPO}/" ]
     check "${arch}: no Replaces" [ -z "$(field Replaces)" ]
     check "${arch}: Depends is expanded" bash -c '[ -n "$1" ] && case "$1" in *"\${"*) exit 1 ;; esac' _ "$(field Depends)"
     depends="$(field Depends | tr ',' '\n' | sed 's/|.*//; s/(.*//; s/:any//; s/[[:space:]]//g' | grep -v '^mica-' | LC_ALL=C sort -u | tr '\n' ' ')"

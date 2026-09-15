@@ -26,9 +26,10 @@ done
 
 FIX="$TMP/fixture"
 OUT="$FIX/_out/podman/$ARCH"
-mkdir -p "$FIX/tools" "$FIX/locks" "$OUT" "$TMP/bin"
+mkdir -p "$FIX/tools" "$FIX/locks" "$FIX/deb" "$OUT" "$TMP/bin"
 cp locks/upstream.lock "$FIX/locks/"
-cp tools/stamp.sh tools/package.sh tools/buildx.sh "$FIX/tools/"
+cp deb/mica-podman.control "$FIX/deb/"
+cp tools/stamp.sh tools/package.sh tools/buildx.sh tools/version.sh "$FIX/tools/"
 BINARIES=(podman quadlet crun conmon netavark aardvark-dns catatonit)
 for b in "${BINARIES[@]}"; do cp "$HOST_ELF" "$OUT/$b"; done
 # Any docker call is recorded: packing starts only after every check passed.
@@ -46,6 +47,13 @@ stamp --stamp "$OUT" >/dev/null
 if cmp -s "$OUT/upstream.lock" "$FIX/locks/upstream.lock"; then pass "S1 --stamp records locks/upstream.lock unchanged"; else fail "S1 $(ls "$OUT")"; fi
 
 if stamp --check "$OUT" >/dev/null; then pass "S2 a freshly stamped directory passes --check"; else fail "S2 $(stamp --check "$OUT")"; fi
+
+sed -i 's/^X-Mica-Source-Date-Epoch: .*/X-Mica-Source-Date-Epoch: 1800000000/' "$FIX/deb/mica-podman.control"
+RC=0; T="$(stamp --check "$OUT")" || RC=$?
+if [ "$RC" -ne 0 ] && says "$T" "was built with SOURCE_DATE_EPOCH" && says "$T" "1800000000"; then
+    pass "S2b an epoch bump makes the directory refuse"
+else fail "S2b rc=$RC: $T"; fi
+cp deb/mica-podman.control "$FIX/deb/"
 
 sed -i 's/^\(git\tcrun\t[^\t]*\t\)[^\t]*/\11.99.9/' "$FIX/locks/upstream.lock"
 RC=0; T="$(stamp --check "$OUT")" || RC=$?

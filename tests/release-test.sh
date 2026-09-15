@@ -45,6 +45,7 @@ set -euo pipefail
 echo "$*" >>"$STORE/calls"
 case "$1" in
 api)
+    case "$2" in */releases\?*) jq -s . "$STORE"/.meta/*.json; exit 0 ;; esac
     tag="${2##*/}"
     [ -f "$STORE/.meta/$tag.json" ] || { echo "gh: Not Found (HTTP 404)" >&2; exit 1; }
     cat "$STORE/.meta/$tag.json"
@@ -75,7 +76,11 @@ chmod +x "$TMP/bin/gh"
 
 FIX="$TMP/repo"
 mkdir -p "$FIX/tools"
-cp tools/release.sh tools/check-lock.sh "$FIX/tools/"
+mkdir -p "$FIX/deb" "$FIX/locks" "$FIX/overlay"
+cp tools/release.sh tools/check-lock.sh tools/version.sh tools/reuse.sh tools/package-inputs.sh "$FIX/tools/"
+cp deb/mica-podman.control "$FIX/deb/"
+cp locks/upstream.lock "$FIX/locks/"
+echo fixture >"$FIX/overlay/fixture.conf"
 printf '_out/\n' >"$FIX/.gitignore"
 git -C "$FIX" init -q
 git -C "$FIX" remote add origin https://github.com/micaoss/mica-podman.git
@@ -86,19 +91,19 @@ git -C "$FIX" -c user.name=f -c user.email=f@invalid commit -qm two --allow-empt
 COMMIT=$(git -C "$FIX" rev-parse HEAD)
 git -C "$FIX" update-ref refs/remotes/origin/main "$COMMIT"
 git -C "$FIX" push -q "$BARE" HEAD:refs/heads/main
-C12=${COMMIT:0:12}
-V="5.8.6+git${C12}-1"
+V="$(bash tools/version.sh version)"
 TAG=20260914-0100
 LOCK=mica-podman.lock
 
-deb() { # <arch> [version] [commit] [payload] [name]
-    local arch="$1" version="${2:-$V}" commit="${3:-$COMMIT}" payload="${4:-payload}"
+deb() { # <arch> [version] [extra control line] [payload] [name]
+    local arch="$1" version="${2:-$V}" extra="${3:-}" payload="${4:-payload}"
     local d="$TMP/pkg-$arch" out="$FIX/_out/debs/$arch/pool"
     rm -rf "$d"
     mkdir -p "$d/DEBIAN" "$d/usr/share/mica-podman" "$out"
     printf '%s\n' "$payload" >"$d/usr/share/mica-podman/fixture"
-    printf 'Package: mica-podman\nVersion: %s\nArchitecture: %s\nMaintainer: Mica OS <hi@micaos.dev>\nDescription: fixture\nMica-Source-Repo: mica-podman\nMica-Source-Commit: %s\n' \
-        "$version" "$arch" "$commit" >"$d/DEBIAN/control"
+    printf 'Package: mica-podman\nVersion: %s\nArchitecture: %s\nMaintainer: Mica OS <hi@micaos.dev>\nDescription: fixture\nMica-Source-Repo: mica-podman\n%s' \
+        "$version" "$arch" "${extra:+$extra
+}" >"$d/DEBIAN/control"
     find "$d" -exec touch -h -d @1700000000 {} +
     SOURCE_DATE_EPOCH=1700000000 dpkg-deb --build --root-owner-group "$d" "$out/${5:-mica-podman_${version}_${arch}.deb}" >/dev/null
 }
@@ -128,12 +133,11 @@ pooled() { # <arch>
     local sha m
     sha=$(sha256sum "$FIX/_out/debs/$1/pool/mica-podman_${V}_$1.deb" | awk '{print $1}')
     m=$(manifest "pool.$1.$TAG") || return 1
-    jq -e --arg t "mica-podman_${V}_$1.deb" --arg d "sha256:$sha" --arg a "$1" --arg c "$COMMIT" --arg v "$TAG" \
+    jq -e --arg t "mica-podman_${V}_$1.deb" --arg d "sha256:$sha" --arg a "$1" --arg i "$(bash "$FIX/tools/package-inputs.sh" "$1")" \
         '.artifactType == "application/vnd.mica.pool" and (.layers | length) == 1 and .layers[0].digest == $d and
          .layers[0].mediaType == "application/vnd.mica.deb" and .layers[0].annotations["org.opencontainers.image.title"] == $t and
-         .annotations["mica.arch"] == $a and .annotations["org.opencontainers.image.revision"] == $c and
-         .annotations["mica.source-commit"] == $c and .annotations["mica.source-repo"] == "mica-podman" and
-         .annotations["org.opencontainers.image.version"] == $v' <<<"$m" >/dev/null
+         .layers[0].annotations["mica.inputs"] == $i and
+         .annotations == {"mica.source-repo": "mica-podman", "mica.arch": $a}' <<<"$m" >/dev/null
 }
 # The lock the release must carry: its rows, from the archives and the pools the registry holds.
 lockrows() {
@@ -173,7 +177,7 @@ if [ "$RC" -eq 0 ] && ! says "$(calls)" "/$LOCK" && says "$(calls)" "SHA256SUMS"
     pass "R3 a partial release receives only the missing assets"
 else fail "R3 rc=$RC: $OUT"; fi
 
-deb amd64 "$V" "$COMMIT" other
+deb amd64 "$V" "" other
 release "$TAG"
 if [ "$RC" -ne 0 ] && says "$OUT" "$LOCK is already attached with other bytes" && [ "$(uploads)" -eq 0 ]; then
     pass "R4 an attached asset with other bytes is refused, not replaced"
@@ -221,6 +225,13 @@ OUT=$(PATH="$TMP/bin:$PATH" GH_TOKEN=fixture-token CORRUPT=1 MICA_RELEASE_DOWNLO
     bash "$FIX/tools/release.sh" 20260914-0600 2>&1) || RC=$?
 if [ "$RC" -ne 0 ] && says "$OUT" "downloads with other bytes"; then pass "R12 an anonymous download with other bytes is refused"; else fail "R12 rc=$RC: $OUT"; fi
 
+cut 20260914-0650
+release 20260914-0650
+if [ "$RC" -ne 0 ] && says "$OUT" "the lock of mica-podman 20260914-0600 does not match its SHA256SUMS" && [ "$(uploads)" -eq 0 ] && nopool 20260914-0650; then
+    pass "R12b a previous release whose lock does not match its SHA256SUMS is refused, not rebuilt around"
+else fail "R12b rc=$RC: $OUT"; fi
+rm -rf "$STORE/20260914-0600" "$STORE/.meta/20260914-0600.json" "$STORE/20260914-0650" "$STORE/.meta/20260914-0650.json"
+
 for bad in 2026-09-14 20261399-2500 20260230-1200 ""; do
     release "$bad"
     if [ "$RC" -ne 0 ] && ! says "$(calls)" "release" && ! says "$(calls)" "api"; then pass "R13 the tag '$bad' is refused before any gh call"; else fail "R13 '$bad' rc=$RC: $OUT"; fi
@@ -235,11 +246,11 @@ refused() { # <label> <message>
 echo change >>"$FIX/.gitignore"
 refused "R14 a dirty checkout is refused before any gh call" "uncommitted changes"
 git -C "$FIX" checkout -q -- .gitignore
-rm -rf "$FIX/_out/debs"; deb amd64 "5.8.6+git${C12}.dirty-1"; deb arm64
-refused "R15 a .dirty archive is refused" "is not <upstream>+git${C12}-1"
-rm -rf "$FIX/_out/debs/arm64"; deb arm64 "5.8.6+git${OTHER:0:12}-1" "$OTHER"
-refused "R16 an archive of another commit is refused" "Mica-Source-Commit $OTHER"
-deb amd64 "$V" "$COMMIT" payload extra_amd64.deb
+rm -rf "$FIX/_out/debs"; deb amd64 "5.8.6-9"; deb arm64
+refused "R15 an archive of another version than the declared one is refused" "is not $V, the version deb/mica-podman.control declares"
+rm -rf "$FIX/_out/debs/arm64"; deb arm64 "$V" "Mica-Source-Commit: $OTHER"
+refused "R16 an archive naming a commit is refused" "carries Mica-Source-Commit"
+deb amd64 "$V" "" payload extra_amd64.deb
 refused "R17 an extra archive is refused" "holds 2 archives"
 release 20260914-0700 ""
 if [ "$RC" -ne 0 ] && says "$OUT" "GH_TOKEN must be set" && [ -z "$(calls)" ]; then pass "R18 no credential is refused by name"; else fail "R18 rc=$RC: $OUT"; fi
@@ -264,6 +275,85 @@ if [ "$RC" -ne 0 ] && says "$OUT" "pool.arm64.20260914-0800 already holds anothe
     cmp -s <(manifest pool.arm64.20260914-0800) "$TMP/other.json"; then
     pass "R19 a pool tag holding another manifest is refused, not replaced, and no asset is uploaded"
 else fail "R19 rc=$RC: $OUT"; fi
+
+# ------------------------------------------------------------ the package-version guard across releases
+# advance <message>: commit the fixture checkout's changes as main.
+advance() {
+    git -C "$FIX" -c user.name=f -c user.email=f@invalid commit -qam "$1"
+    COMMIT=$(git -C "$FIX" rev-parse HEAD)
+    git -C "$FIX" update-ref refs/remotes/origin/main "$COMMIT"
+    git -C "$FIX" push -q -f "$BARE" HEAD:refs/heads/main
+}
+pooldigest() { manifest "pool.$1.$2" | sha256sum | awk '{print $1}'; } # <arch> <release>
+lockpool() { awk -F'\t' -v a="$1" '$1 == "pool" && $2 == a { sub(/.*@sha256:/, "", $3); print $3 }' "$STORE/$2/$LOCK"; } # <arch> <release>
+notag() { nopool "$1" && [ "$(uploads)" -eq 0 ]; }
+
+reset_debs
+cut 20260914-0900
+release 20260914-0900
+if [ "$RC" -eq 0 ] && says "$OUT" "mica-podman amd64 $V: reuse 20260914-0100" && says "$OUT" "mica-podman arm64 $V: reuse 20260914-0100" &&
+    [ "$(pooldigest amd64 20260914-0900)" = "$(pooldigest amd64 $TAG)" ] && [ "$(lockpool arm64 20260914-0900)" = "$(lockpool arm64 $TAG)" ]; then
+    pass "R20 the same version with the same inputs and bytes reuses the previous release: the pools keep their digests under the new tags"
+else fail "R20 rc=$RC: $OUT"; fi
+
+echo changed >"$FIX/overlay/fixture.conf"
+advance "change an input"
+cut 20260914-0910
+release 20260914-0910
+if [ "$RC" -ne 0 ] && says "$OUT" "inputs of mica-podman changed without a version bump" && notag 20260914-0910; then
+    pass "R21 inputs changed without a version bump are refused before anything is written"
+else fail "R21 rc=$RC: $OUT"; fi
+
+echo fixture >"$FIX/overlay/fixture.conf"
+advance "restore the input"
+deb amd64 "$V" "" other
+cut 20260914-0920
+release 20260914-0920
+if [ "$RC" -ne 0 ] && says "$OUT" "rebuilds to" && says "$OUT" "so bump the version" && notag 20260914-0920; then
+    pass "R22 the same version and inputs with other bytes are refused"
+else fail "R22 rc=$RC: $OUT"; fi
+reset_debs
+
+sed -i 's/^\(git\tpodman\t[^\t]*\t\)v5\.8\.6/\1v5.8.5/' "$FIX/locks/upstream.lock"
+sed -i 's/^Version: .*/Version: 5.8.5-1/' "$FIX/deb/mica-podman.control"
+advance "a lower version"
+rm -rf "$FIX/_out/debs"; deb amd64 5.8.5-1; deb arm64 5.8.5-1
+cut 20260914-0930
+release 20260914-0930
+if [ "$RC" -ne 0 ] && says "$OUT" "5.8.5-1 is lower than $V of mica-podman 20260914-0900" && notag 20260914-0930; then
+    pass "R23 a version lower than the previous release's is refused"
+else fail "R23 rc=$RC: $OUT"; fi
+
+cp locks/upstream.lock "$FIX/locks/"
+sed -i 's/^Version: .*/Version: 5.8.6-2/' "$FIX/deb/mica-podman.control"
+advance "bump the revision"
+V=5.8.6-2
+rm -rf "$FIX/_out/debs"; deb amd64 "$V" "" bumped; deb arm64 "$V" "" bumped
+cut 20260914-0940
+release 20260914-0940
+if [ "$RC" -eq 0 ] && says "$OUT" "mica-podman amd64 5.8.6-2: build" && [ "$(pooldigest amd64 20260914-0940)" != "$(pooldigest amd64 20260914-0900)" ] &&
+    grep -c "^package	mica-podman	amd64	5.8.6-2	" "$STORE/20260914-0940/$LOCK" >/dev/null; then
+    pass "R24 a higher version is built and published"
+else fail "R24 rc=$RC: $OUT"; fi
+
+# A previous release made before layers recorded mica.inputs: its pools without the annotation.
+cut 20260914-0950
+for a in amd64 arm64; do
+    manifest "pool.$a.20260914-0940" | jq -c 'del(.layers[].annotations["mica.inputs"])' | tr -d '\n' >"$TMP/old-$a.json"
+    curl -sf -o /dev/null -X PUT -H 'Content-Type: application/vnd.oci.image.manifest.v1+json' --data-binary "@$TMP/old-$a.json" "$REG/v2/$POOL/manifests/pool.$a.20260914-0950"
+done
+{
+    printf '# mica-lock v1\nrelease\tmica-podman\t20260914-0950\t%s\n' "$COMMIT"
+    for a in amd64 arm64; do printf 'pool\t%s\tghcr.io/%s:pool.%s.20260914-0950@sha256:%s\n' "$a" "$POOL" "$a" "$(sha256sum "$TMP/old-$a.json" | awk '{print $1}')"; done
+    grep '^package' "$STORE/20260914-0940/$LOCK"
+} >"$STORE/20260914-0950/$LOCK"
+(cd "$STORE/20260914-0950" && sha256sum "$LOCK" >SHA256SUMS)
+jq --arg n "$LOCK" '.assets = [{name: $n, size: 1, digest: "sha256:00", state: "uploaded"}]' "$STORE/.meta/20260914-0950.json" >"$TMP/meta" && mv "$TMP/meta" "$STORE/.meta/20260914-0950.json"
+cut 20260914-0955
+release 20260914-0955
+if [ "$RC" -eq 0 ] && says "$OUT" "mica-podman amd64 5.8.6-2: build" && [ "$(pooldigest arm64 20260914-0955)" = "$(pooldigest arm64 20260914-0940)" ]; then
+    pass "R25 a previous release without recorded inputs is not a reuse source: everything is built"
+else fail "R25 rc=$RC: $OUT"; fi
 
 echo "RESULT: $FAIL_N failed, $PASS_N passed"
 [ "$FAIL_N" -eq 0 ]

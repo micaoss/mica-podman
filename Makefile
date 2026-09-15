@@ -2,7 +2,7 @@
 
 MICA_ARCH ?= arm64
 
-.PHONY: help inputs podman podman-pins podman-pins-test stamp-test inputs-test lock-test package-test release-test base-check base-check-test deb pool package-gate publish offline offline-test lint check
+.PHONY: help inputs podman podman-pins podman-pins-test stamp-test inputs-test lock-test version-test package-inputs-test package-test release-test base-check base-check-test deb pool package-gate publish offline offline-test lint check
 
 help:
 	@echo "  inputs              verify every lock in locks/ against its pinned release (network)"
@@ -14,7 +14,7 @@ help:
 	@echo "  publish             publish _out/debs as the pools and assets of the published release TAG=<YYYYMMDD-HHMM> (release workflow only)"
 	@echo "  base-check          every Debian package mica-podman needs comes from the pinned mica-system-base release (network)"
 	@echo "  podman-pins         are the upstream tags in locks/upstream.lock current? (network)"
-	@echo "  check               lint, podman-pins-test, stamp-test, inputs-test, lock-test, package-test, release-test, base-check-test, offline-test"
+	@echo "  check               lint, podman-pins-test, stamp-test, inputs-test, lock-test, version-test, package-inputs-test, package-test, release-test, base-check-test, offline-test"
 
 inputs:
 	bash tools/inputs.sh verify
@@ -53,6 +53,12 @@ inputs-test:
 lock-test:
 	bash tests/lock-test.sh
 
+version-test:
+	bash tests/version-test.sh
+
+package-inputs-test:
+	bash tests/package-inputs-test.sh
+
 package-test:
 	bash tests/package-test.sh
 
@@ -71,4 +77,4 @@ base-check-test:
 lint:
 	bash tests/shell-lint.sh
 
-check: lint podman-pins-test stamp-test inputs-test lock-test package-test release-test base-check-test offline-test
+check: lint podman-pins-test stamp-test inputs-test lock-test version-test package-inputs-test package-test release-test base-check-test offline-test

@@ -1,5 +1,25 @@
 # Changelog
 
+## 2026-09-15 10:55 [progress]
+
+mica-podman is locked by its own version (plan `20260915-1042-package-versions`,
+`mica:docs/decisions/2026-09-15-package-versions.md` R0-R8).
+`deb/mica-podman.control` declares `Version: 5.8.6-1` and
+`X-Mica-Source-Date-Epoch: 1786640584`; `tools/version.sh` reads them and
+requires the upstream part to be the podman tag. The engine build and the pack
+use that epoch (podman, netavark and aardvark-dns embed it instead of their own
+commit times), the stamp records it, and the archive carries no
+Mica-Source-Commit and no `+git` version. `tools/package-inputs.sh` hashes what
+decides the bytes (build-env images excluded); release pool layers record it as
+`mica.inputs`, and pool manifests carry only `mica.source-repo` and `mica.arch`.
+`tools/reuse.sh`, in ci.yml and at release, compares every archive with the
+latest release carrying the lock: a lower version is refused, a higher one
+built, the same version needs the same inputs and bytes and is reused by
+digest; a release without recorded inputs is no reuse source, so the first
+release under the rules builds everything. `make offline` warns that no release
+was compared. Local: make check (release test 29 cases); amd64 engine, pack and
+package-gate --reproduce; reuse.sh against 20260915-0245 says build.
+
 ## 2026-09-15 03:40 [progress]
 
 mica-system-base moves to `20260915-0209` (built on mica-build-env

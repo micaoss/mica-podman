@@ -33,6 +33,7 @@ docker buildx build --builder "${BUILDER}" \
     --platform "linux/${MICA_ARCH}" ${NO_CACHE[@]+"${NO_CACHE[@]}"} \
     "${IMAGE_ARGS[@]}" \
     --build-arg "ELF_ARCH=${ELF_ARCH}" \
+    --build-arg "SOURCE_DATE_EPOCH=$(bash "${HERE}/tools/version.sh" epoch)" \
     -f "${HERE}/Dockerfile" \
     -o "type=local,dest=${OUT}" \
     "${HERE}"

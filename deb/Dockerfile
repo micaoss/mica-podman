@@ -31,7 +31,6 @@ ARG MICA_DEB_VERSION
 ARG MICA_DEB_ARCH
 ARG SOURCE_DATE_EPOCH
 ARG MICA_DEB_SOURCE_REPO
-ARG MICA_DEB_SOURCE_COMMIT
 
 # Symlinks are relative so they resolve inside a staging root. No conffiles:
 # the root is an immutable dm-verity image.

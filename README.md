@@ -59,7 +59,9 @@ Publishing it runs `release.yml`: it builds and gates the release's tag, then
 
 `mica-podman.lock` is a `mica-lock v1` release lock: the release row, a `pool`
 row per architecture by digest and a `package` row per architecture with the
-archive's version and sha256, the layer of that pool. A consumer commits it
+archive's version and sha256, the layer of that pool. A pool manifest carries
+only `mica.source-repo` and `mica.arch`, and each layer its title and
+`mica.inputs`, so a pool whose package did not change keeps its digest. A consumer commits it
 unchanged as `locks/mica-podman.lock` with its pin. It refuses a tag that is not a UTC time, a commit
 not on main, a tag that does not name the built commit, and a release that is
 missing, a draft or of another repository. Nothing published is replaced:
@@ -83,11 +85,23 @@ package creates no system users or groups.
 
 ## Bumping a version
 
+The package is locked by its own version
+(mica:docs/decisions/2026-09-15-package-versions.md): `deb/mica-podman.control`
+declares `Version: <podman version>-<revision>` and `X-Mica-Source-Date-Epoch`,
+the one `SOURCE_DATE_EPOCH` of the engine build and the pack, and a release never
+changes them. A podman bump sets the upstream part and resets the revision; any
+other change to what the package holds (another pin, `deb/`, `overlay/`, the
+build) bumps the revision. Bump the epoch together with the version.
+`tools/reuse.sh` (CI and release) compares every archive with the latest release:
+a lower version is refused, a higher one is built, and the same version must
+carry the same `mica.inputs` (`tools/package-inputs.sh`) and rebuild to the
+published bytes, which the release then reuses by digest.
+
 Edit the component's `git` row of `locks/upstream.lock`: its tag and that tag's
 commit. The build clones the tag and refuses another commit.
-`_out/podman/<arch>/upstream.lock` records which pins a build used, and the
-package ships it as `/usr/share/mica-podman/upstream.lock`; packaging refuses a
-stale directory. The package version is `<podman tag without v>+git<commit12>-1`.
+`_out/podman/<arch>/upstream.lock` and `source-date-epoch` record which pins and
+epoch a build used, and the package ships `/usr/share/mica-podman/upstream.lock`;
+packaging refuses a stale directory.
 `make podman-pins` (weekly in CI) reports pins that have a newer upstream
 release; it never edits the file.
 

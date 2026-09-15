@@ -14,8 +14,10 @@ fail() { FAIL_N=$((FAIL_N + 1)); echo "FAIL: $*"; }
 says() { case "$1" in *"$2"*) return 0;; *) return 1;; esac; }
 
 FIX="$TMP/repo"
-mkdir -p "$FIX/tools"
-cp tools/offline.sh "$FIX/tools/"
+mkdir -p "$FIX/tools" "$FIX/deb" "$FIX/locks"
+cp tools/offline.sh tools/version.sh "$FIX/tools/"
+cp deb/mica-podman.control "$FIX/deb/"
+cp locks/upstream.lock "$FIX/locks/"
 printf '_out/\n' >"$FIX/.gitignore"
 # The stubs log each call; package.sh writes a pool indexed as the real one is.
 cat >"$FIX/build.sh" <<'EOF'
@@ -55,7 +57,7 @@ git -C "$FIX" checkout -q -- .gitignore
 offline
 if [ "$RC" -eq 0 ] && [ "$CALLS" = "$(printf 'build amd64\npackage --arch amd64\nbuild arm64\npackage --arch arm64')" ] &&
     says "$OUT" "$FIX/_out/debs/amd64/pool" && says "$OUT" "$FIX/_out/debs/arm64/SHA256SUMS" && says "$OUT" "$FIX/_out/debs/arm64/Packages" &&
-    says "$OUT" "$(git -C "$FIX" rev-parse HEAD)"; then
+    says "$OUT" "$(git -C "$FIX" rev-parse HEAD)" && says "$OUT" "warning: no release was compared"; then
     pass "O2 a clean tree builds and packs amd64 then arm64 and prints each pool, Packages and SHA256SUMS"
 else fail "O2 rc=$RC calls=$CALLS: $OUT"; fi
 

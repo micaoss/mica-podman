@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Pack _out/podman/<arch> as mica-podman_<PODMAN_VERSION>+git<commit12>[.dirty]-1_<arch>.deb.
+# Pack _out/podman/<arch> as mica-podman_<version>_<arch>.deb, the version and
+# SOURCE_DATE_EPOCH deb/mica-podman.control declares (tools/version.sh).
 #
 #   bash tools/package.sh --arch <amd64|arm64> [--out <dir>] [--no-cache]
 #
@@ -45,13 +46,8 @@ done
 . "${REPO_ROOT}/tools/buildx.sh"
 buildx_builder "${ARCH}"
 
-COMMIT="$(git -C "${REPO_ROOT}" rev-parse HEAD)"
-DIRTY=""
-[ -z "$(git -C "${REPO_ROOT}" status --porcelain)" ] || DIRTY=".dirty"
-PODMAN_VERSION="$(awk -F'\t' '$1 == "git" && $2 == "podman" { sub(/^v/, "", $4); print $4 }' "${REPO_ROOT}/locks/upstream.lock")"
-[[ "${PODMAN_VERSION}" =~ ^[0-9][0-9.]*$ ]] || die "the podman tag of locks/upstream.lock, '${PODMAN_VERSION}', is not a version"
-VERSION="${PODMAN_VERSION}+git${COMMIT:0:12}${DIRTY}-1"
-EPOCH="$(git -C "${REPO_ROOT}" show -s --format=%ct HEAD)"
+VERSION="$(bash "${REPO_ROOT}/tools/version.sh" version)"
+EPOCH="$(bash "${REPO_ROOT}/tools/version.sh" epoch)"
 ORIGIN="$(git -C "${REPO_ROOT}" remote get-url origin)"
 SOURCE_REPO="$(basename "${ORIGIN%/}" .git)"
 BASE="$(bash "${REPO_ROOT}/tools/inputs.sh" image base)"
@@ -69,7 +65,6 @@ docker buildx build --builder "${BUILDER}" --platform "linux/${ARCH}" ${NO_CACHE
     --build-arg "MICA_DEB_ARCH=${ARCH}" \
     --build-arg "SOURCE_DATE_EPOCH=${EPOCH}" \
     --build-arg "MICA_DEB_SOURCE_REPO=${SOURCE_REPO}" \
-    --build-arg "MICA_DEB_SOURCE_COMMIT=${COMMIT}" \
     --build-context "overlay=${REPO_ROOT}/overlay" \
     --build-context "bin=${STAGE}" \
     -f "${REPO_ROOT}/deb/Dockerfile" \

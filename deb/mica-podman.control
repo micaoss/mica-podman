@@ -1,5 +1,6 @@
 Package: mica-podman
-Version: @VERSION@
+Version: 5.8.6-1
+X-Mica-Source-Date-Epoch: 1786640584
 Architecture: @ARCH@
 Maintainer: Mica OS <hi@micaos.dev>
 Section: admin

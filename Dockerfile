@@ -82,11 +82,12 @@ COPY --from=src /src/netavark /src/netavark
 COPY --from=src /src/aardvark-dns /src/aardvark-dns
 
 # Cached target/ directories; cargo rebuilds by fingerprint. The embedded build
-# time is SOURCE_DATE_EPOCH, each component's pinned commit time (the tree hash
-# covers it: `git archive` stamps it on every entry), so rebuilds are identical.
+# time is SOURCE_DATE_EPOCH, the one deb/mica-podman.control declares (build.sh
+# passes it), so rebuilds are identical.
 # Each crate's own build-script output and fingerprints are dropped first: its
 # build.rs reruns only when build.rs changes, so a cached run would keep the
 # build time of whichever build filled the cache.
+ARG SOURCE_DATE_EPOCH
 RUN --mount=type=cache,target=/usr/local/cargo/registry,id=cargo-registry \
     --mount=type=cache,target=/usr/local/cargo/git,id=cargo-git \
     --mount=type=cache,target=/src/netavark/target,id=netavark-target \
@@ -94,9 +95,9 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry,id=cargo-registry \
     set -eu; mkdir -p /out; \
     rm -rf /src/netavark/target/release/build/netavark-* /src/netavark/target/release/.fingerprint/netavark-* \
         /src/aardvark-dns/target/release/build/aardvark-dns-* /src/aardvark-dns/target/release/.fingerprint/aardvark-dns-*; \
-    cd /src/netavark && SOURCE_DATE_EPOCH="$(git log -1 --format=%ct)" cargo build --release; \
+    cd /src/netavark && SOURCE_DATE_EPOCH="${SOURCE_DATE_EPOCH}" cargo build --release; \
     install -m0755 target/release/netavark /out/netavark; \
-    cd /src/aardvark-dns && SOURCE_DATE_EPOCH="$(git log -1 --format=%ct)" cargo build --release; \
+    cd /src/aardvark-dns && SOURCE_DATE_EPOCH="${SOURCE_DATE_EPOCH}" cargo build --release; \
     install -m0755 target/release/aardvark-dns /out/aardvark-dns
 
 FROM ${MICA_BUILD_GO} AS go-build
@@ -113,12 +114,13 @@ COPY --from=src /src/podman /src/podman
 ARG BUILDTAGS="seccomp systemd libsubid containers_image_openpgp exclude_graphdriver_btrfs exclude_graphdriver_devicemapper"
 
 # quadlet embeds ${PREFIX}/bin as the podman path in generated units. The
-# build time podman embeds is its pinned commit time, as for the Rust stage.
+# build time podman embeds is the declared SOURCE_DATE_EPOCH, as for the Rust stage.
 ARG PODMAN_PREFIX=/usr
+ARG SOURCE_DATE_EPOCH
 RUN --mount=type=cache,target=/root/.cache/go-build \
     --mount=type=cache,target=/go/pkg/mod \
     set -eu; cd /src/podman; mkdir -p /out; \
-    make PREFIX="${PODMAN_PREFIX}" BUILDTAGS="${BUILDTAGS}" SOURCE_DATE_EPOCH="$(git log -1 --format=%ct)" bin/podman bin/quadlet; \
+    make PREFIX="${PODMAN_PREFIX}" BUILDTAGS="${BUILDTAGS}" SOURCE_DATE_EPOCH="${SOURCE_DATE_EPOCH}" bin/podman bin/quadlet; \
     install -m0755 bin/podman /out/podman; \
     install -m0755 bin/quadlet /out/quadlet; \
     if strings -a bin/quadlet | grep -qx "/usr/local/bin"; then \

@@ -9,8 +9,12 @@
 # Run by release.yml for the release the user cut with
 # `gh release create <YYYYMMDD-HHMM> --target <commit of main>`. A pool is an OCI
 # manifest (artifactType application/vnd.mica.pool) with the archive as its one
-# layer (application/vnd.mica.deb, titled with its file name); created is the
-# commit time, so a rerun gives the same digest. The release carries exactly
+# layer (application/vnd.mica.deb, titled with its file name, mica.inputs its
+# inputs hash) and only release-independent annotations (mica.source-repo,
+# mica.arch), so an unchanged pool keeps its digest and the new tag names the
+# same bytes. tools/reuse.sh first checks every archive against the previous
+# release: a lower version, or the same version with other inputs or bytes,
+# is refused. The release carries exactly
 # <repository>.lock (mica-lock v1: release, pool and package rows) and
 # SHA256SUMS listing it. Every archive is checked before any gh call. Nothing is
 # written unless the tag is a real UTC time, the checked-out commit is on main,
@@ -38,7 +42,6 @@ TAG="$1"
 cd "${REPO_ROOT}"
 [ -z "$(git status --porcelain)" ] || die "the checkout has uncommitted changes; only a clean HEAD is released"
 COMMIT="$(git rev-parse HEAD)"
-C12="${COMMIT:0:12}"
 ORIGIN="$(git remote get-url origin)"
 [[ "${ORIGIN}" =~ github\.com[:/]([A-Za-z0-9._-]+)/([A-Za-z0-9._-]+)$ ]] || die "origin ${ORIGIN} is not a GitHub repository"
 SLUG="${BASH_REMATCH[1]}/${BASH_REMATCH[2]%.git}"
@@ -54,6 +57,7 @@ WORK="$(mktemp -d)"
 trap 'rm -rf "${WORK}"' EXIT
 mkdir -p "${WORK}/assets" "${WORK}/download"
 
+DECLARED="$(bash tools/version.sh version)"
 VERSION=""
 for arch in "${ARCHES[@]}"; do
     dir="_out/debs/${arch}/pool"
@@ -64,23 +68,21 @@ for arch in "${ARCHES[@]}"; do
     [ "$(field Package)" = "${PACKAGE}" ] || die "${deb} is Package $(field Package), not ${PACKAGE}"
     [ "$(field Architecture)" = "${arch}" ] || die "${deb} is Architecture $(field Architecture), not ${arch}"
     [ "$(field Mica-Source-Repo)" = "${REPOSITORY}" ] || die "${deb} carries Mica-Source-Repo $(field Mica-Source-Repo), not ${REPOSITORY}"
-    [ "$(field Mica-Source-Commit)" = "${COMMIT}" ] || die "${deb} carries Mica-Source-Commit $(field Mica-Source-Commit), not HEAD ${COMMIT}"
+    [ -z "$(field Mica-Source-Commit)" ] || die "${deb} carries Mica-Source-Commit; a package names no commit"
     v="$(field Version)"
-    [[ "${v}" =~ ^[0-9][0-9.]*\+git${C12}-1$ ]] || die "${deb} Version ${v} is not <upstream>+git${C12}-1"
+    [ "${v}" = "${DECLARED}" ] || die "${deb} Version ${v} is not ${DECLARED}, the version deb/mica-podman.control declares"
     [ -z "${VERSION}" ] || [ "${v}" = "${VERSION}" ] || die "${deb} Version ${v} differs from ${VERSION}; one stamp per release"
     VERSION="${v}"
     [ "$(basename "${deb}")" = "${PACKAGE}_${v}_${arch}.deb" ] || die "${deb} is not named ${PACKAGE}_${v}_${arch}.deb"
     cp "${deb}" "${WORK}/pool-${arch}.deb"
     sha="$(sha256sum "${deb}" | cut -d' ' -f1)"
     jq -cn --arg type "${MANIFEST_TYPE}" --arg config "${EMPTY_CONFIG}" --arg d "sha256:${sha}" --argjson size "$(stat -c %s "${deb}")" \
-        --arg title "$(basename "${deb}")" --arg tag "${TAG}" --arg commit "${COMMIT}" --arg source "https://github.com/${SLUG}" --arg repository "${REPOSITORY}" --arg arch "${arch}" \
-        --arg created "$(date -u -d "@$(git log -1 --format=%ct)" +%Y-%m-%dT%H:%M:%SZ)" \
+        --arg title "$(basename "${deb}")" --arg inputs "$(bash tools/package-inputs.sh "${arch}")" --arg repository "${REPOSITORY}" --arg arch "${arch}" \
         '{schemaVersion: 2, mediaType: $type, artifactType: "application/vnd.mica.pool",
           config: {mediaType: "application/vnd.oci.empty.v1+json", digest: $config, size: 2},
-          layers: [{mediaType: "application/vnd.mica.deb", digest: $d, size: $size, annotations: {"org.opencontainers.image.title": $title}}],
-          annotations: {"org.opencontainers.image.version": $tag, "org.opencontainers.image.revision": $commit,
-            "org.opencontainers.image.created": $created, "org.opencontainers.image.source": $source,
-            "mica.source-repo": $repository, "mica.source-commit": $commit, "mica.arch": $arch}}' \
+          layers: [{mediaType: "application/vnd.mica.deb", digest: $d, size: $size,
+            annotations: {"org.opencontainers.image.title": $title, "mica.inputs": $inputs}}],
+          annotations: {"mica.source-repo": $repository, "mica.arch": $arch}}' \
         | tr -d '\n' >"${WORK}/pool-${arch}.json"
     printf 'pool\t%s\tghcr.io/%s:pool.%s.%s@sha256:%s\n' "${arch}" "${POOL}" "${arch}" "${TAG}" \
         "$(sha256sum "${WORK}/pool-${arch}.json" | cut -d' ' -f1)" >>"${WORK}/pools"
@@ -133,6 +135,12 @@ done
 while IFS= read -r n; do
     [ -e "${WORK}/assets/${n}" ] || die "release ${TAG} carries ${n}, which this release does not publish"
 done < <(jq -r '.assets[].name' "${WORK}/release.json")
+
+# Every archive against the previous release, before anything is written.
+for arch in "${ARCHES[@]}"; do
+    decision="$(bash tools/reuse.sh --before "${TAG}" "${arch}" "${WORK}/pool-${arch}.deb")" || exit 1
+    echo "release.sh: ${PACKAGE} ${arch} ${VERSION}: ${decision}"
+done
 
 # The pools. A bearer from the registry's challenge, as GH_TOKEN or anonymously;
 # none when the registry does not challenge. The token stays out of argv.
