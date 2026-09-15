@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-09-15 21:30 [fix]
+
+Three `| head -n1` pipelines are gone: under `pipefail` a consumer that exits
+before its input ends can kill the producer with SIGPIPE and fail the pipeline.
+`tools/base-check.sh` (the SHA256 and Filename of an apt-cache record),
+`tools/release.sh` (the upload Location header) and `tests/release-test.sh` (the
+registry port) now read the whole output and take the first line with a
+parameter expansion. `tests/shell-lint.sh`, which flagged `grep -q`, now flags
+`grep -m` and `head` on the right of a pipe as well.
+
 ## 2026-09-15 11:15 [release]
 
 `20260915-1057` at `d47ffbc` is the first release under the package-version

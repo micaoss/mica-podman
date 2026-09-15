@@ -19,7 +19,9 @@ says() { case "$1" in *"$2"*) return 0;; *) return 1;; esac; }
 net=()
 if docker network inspect traefik >/dev/null 2>&1; then net=(--network traefik); fi
 docker run -d --rm --label ai-agent=true --name "$NAME" "${net[@]}" -p 127.0.0.1::5000 "$REGISTRY_IMAGE" >/dev/null
-PORT=$(docker port "$NAME" 5000/tcp | head -n1 | sed 's/.*://')
+PORT=$(docker port "$NAME" 5000/tcp)
+PORT=${PORT%%$'\n'*}
+PORT=${PORT##*:}
 REG=""
 for _ in $(seq 1 30); do
     for url in "http://127.0.0.1:$PORT" "http://$NAME:5000"; do

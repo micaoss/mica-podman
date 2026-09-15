@@ -185,7 +185,9 @@ blob() { # <file>: upload unless the registry has it
     [ "$(http /dev/null "${WORK}/push-auth" -I "${REGISTRY}/v2/${POOL}/blobs/${digest}")" != 200 ] || return 0
     status="$(http "${WORK}/upload" "${WORK}/push-auth" -X POST -D "${WORK}/upload.h" -H 'Content-Length: 0' "${REGISTRY}/v2/${POOL}/blobs/uploads/")"
     [ "${status}" = 202 ] || die "starting an upload to ghcr.io/${POOL} answered HTTP ${status}: $(head -c 200 "${WORK}/upload")"
-    location="$(tr -d '\r' <"${WORK}/upload.h" | sed -n 's/^[Ll]ocation: //p' | head -n1)"
+    # First line without a pipe: an early-exiting head would SIGPIPE sed under pipefail.
+    location="$(tr -d '\r' <"${WORK}/upload.h" | sed -n 's/^[Ll]ocation: //p')"
+    location="${location%%$'\n'*}"
     case "${location}" in /*) location="${REGISTRY}${location}" ;; esac
     case "${location}" in *\?*) location="${location}&digest=${digest}" ;; *) location="${location}?digest=${digest}" ;; esac
     status="$(http "${WORK}/upload" "${WORK}/push-auth" -X PUT -H 'Content-Type: application/octet-stream' --data-binary "@${file}" "${location}")"

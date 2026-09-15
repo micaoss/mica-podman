@@ -91,8 +91,10 @@ apt_resolve() { # <arch> <work>: package, arch, version, sha256, url of each arc
         apt-get "${o[@]}" install --print-uris --no-install-recommends -qq $(cat /w/roots) | while read -r _ file _ _; do
             name="${file%%_*}"; version="${file#*_}"; version="${version%_*}"; version="$(printf "%b" "${version//%/\\x}")"
             show="$(apt-cache "${o[@]}" show "${name}=${version}")"
-            printf "%s\t%s\t%s\t%s\t%s/%s\n" "${name}" "${arch}" "${version}" \
-                "$(sed -n "s/^SHA256: //p" <<<"${show}" | head -n1)" "${uri}" "$(sed -n "s/^Filename: //p" <<<"${show}" | head -n1)"
+            # First line without a pipe: an early-exiting head would SIGPIPE sed under pipefail.
+            sha="$(sed -n "s/^SHA256: //p" <<<"${show}")"; sha="${sha%%$'"'"'\n'"'"'*}"
+            file_path="$(sed -n "s/^Filename: //p" <<<"${show}")"; file_path="${file_path%%$'"'"'\n'"'"'*}"
+            printf "%s\t%s\t%s\t%s\t%s/%s\n" "${name}" "${arch}" "${version}" "${sha}" "${uri}" "${file_path}"
         done' _ "$1"
 }
 

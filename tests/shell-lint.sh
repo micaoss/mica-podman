@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # In a script that sets pipefail, `producer | grep -q` reports failure when the
-# pattern IS found (grep exits early, the producer dies of SIGPIPE). Flag it.
-# Only -q is flagged; comment lines are skipped. A tree with unresolved merge
+# pattern IS found (grep exits early, the producer dies of SIGPIPE). The same
+# holds for any consumer that exits before its input ends: `head`, `grep -m`.
+# Flag them; comment lines are skipped. A tree with unresolved merge
 # conflicts is refused, since git ls-files would list those paths per stage.
 set -euo pipefail
 
@@ -30,14 +31,14 @@ for f in "${files[@]}"; do
     [ -f "${f}" ] || continue
     grep -c 'pipefail' "${f}" >/dev/null || continue
     scanned=$((scanned + 1))
-    hits="$(grep -nE '\|[[:space:]]*(command[[:space:]]+)?e?grep([[:space:]]+-[A-Za-z]*q[A-Za-z]*)+' "${f}" |
+    hits="$(grep -nE '\|[[:space:]]*(command[[:space:]]+)?(e?grep([[:space:]]+-[A-Za-z]*(q|m[[:space:]]*[0-9]))|head([[:space:]]|$))' "${f}" |
         grep -vE '^[0-9]+:[[:space:]]*#' || true)"
     if [ -n "${hits}" ]; then
         while IFS= read -r h; do
-            fail "${f}:${h%%:*}: an early-exiting grep on the right of a pipe, in a file that sets pipefail: the pipeline reports failure when the pattern IS found. Use 'grep -c ... >/dev/null'"
+            fail "${f}:${h%%:*}: a consumer that exits before its input ends (grep -q, grep -m, head) on the right of a pipe, in a file that sets pipefail: the producer dies of SIGPIPE and the pipeline reports failure. Use 'grep -c ... >/dev/null', or read it all and take what you need"
         done <<<"${hits}"
     else
-        pass "${f} pipes nothing into an early-exiting grep"
+        pass "${f} pipes nothing into a consumer that exits early"
     fi
 done
 
