@@ -1,6 +1,6 @@
 # 20260915-1042-package-versions Packages locked by their own version
 
-- **status**: in_progress
+- **status**: completed
 - **createdAt**: 2026-09-15 10:42
 - **approvedAt**: 2026-09-15 (user decision "全部按建议处理", dispatched by coordinator uj991oa2)
 - **relatedTask**: 20260915-1042-package-versions

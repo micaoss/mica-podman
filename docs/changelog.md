@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-09-15 11:15 [release]
+
+`20260915-1057` at `d47ffbc` is the first release under the package-version
+rules (CI 34959620045, release run 34960701595): `mica-podman` `5.8.6-1` for
+amd64 and arm64, built because `20260915-0245` predates recorded inputs; pool
+manifests carry only `mica.source-repo` and `mica.arch`, and each layer its
+`mica.inputs`. `SHA256SUMS` sha256 `d347fdf5...`; verified anonymously and valid
+for the spec checker. mica-system-base moves to `20260915-1102` (upstream and
+apt rows unchanged, base-check closure unchanged); `locks/` is not a package
+input, so the package keeps its version.
+
 ## 2026-09-15 10:55 [progress]
 
 mica-podman is locked by its own version (plan `20260915-1042-package-versions`,

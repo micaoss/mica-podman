@@ -4,4 +4,4 @@
 - [~] [**20260914-1932-oci-pool-release Publish the OCI pool and podman-pkgs.lock with each release**](20260914-1932-oci-pool-release.md) `P1`
 - [x] [**20260914-2047-offline-build Offline build target**](20260914-2047-offline-build.md) `P1`
 - [x] [**20260915-0109-release-lock Release lock migration (stage 3)**](20260915-0109-release-lock.md) `P1`
-- [-] [**20260915-1042-package-versions Packages locked by their own version**](20260915-1042-package-versions.md) `P1`
+- [x] [**20260915-1042-package-versions Packages locked by their own version**](20260915-1042-package-versions.md) `P1`

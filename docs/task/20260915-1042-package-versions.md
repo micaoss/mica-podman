@@ -1,6 +1,6 @@
 # 20260915-1042-package-versions Packages locked by their own version
 
-- **status**: in_progress
+- **status**: completed
 - **priority**: P1
 - **owner**: sq6oxsf0
 - **createdAt**: 2026-09-15 10:42
@@ -25,5 +25,8 @@ Locking mica-podman by its own version
 
 ## Notes
 
-- Design deltas D1-D7 reported to the coordinator; D1 (the first release under
-  the rules against the older +git release) awaits an answer.
+- Design deltas D1-D7 accepted by the coordinator (mica 1266fbf, 19fbdce).
+- Done: d47ffbc (CI 34959620045); release 20260915-1057 (run 34960701595),
+  verified anonymously; the next commit's CI must reuse it.
+
+- complete: d47ffbc; release 20260915-1057
