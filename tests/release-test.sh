@@ -327,14 +327,15 @@ if [ "$RC" -ne 0 ] && says "$OUT" "5.8.5-1 is lower than $V of mica-podman 20260
 else fail "R23 rc=$RC: $OUT"; fi
 
 cp locks/upstream.lock "$FIX/locks/"
-sed -i 's/^Version: .*/Version: 5.8.6-2/' "$FIX/deb/mica-podman.control"
+NEXT="${V%-*}-$(( ${V##*-} + 1 ))"
+sed -i "s/^Version: .*/Version: $NEXT/" "$FIX/deb/mica-podman.control"
 advance "bump the revision"
-V=5.8.6-2
+V="$NEXT"
 rm -rf "$FIX/_out/debs"; deb amd64 "$V" "" bumped; deb arm64 "$V" "" bumped
 cut 20260914-0940
 release 20260914-0940
-if [ "$RC" -eq 0 ] && says "$OUT" "mica-podman amd64 5.8.6-2: build" && [ "$(pooldigest amd64 20260914-0940)" != "$(pooldigest amd64 20260914-0900)" ] &&
-    grep -c "^package	mica-podman	amd64	5.8.6-2	" "$STORE/20260914-0940/$LOCK" >/dev/null; then
+if [ "$RC" -eq 0 ] && says "$OUT" "mica-podman amd64 $V: build" && [ "$(pooldigest amd64 20260914-0940)" != "$(pooldigest amd64 20260914-0900)" ] &&
+    grep -c "^package	mica-podman	amd64	$V	" "$STORE/20260914-0940/$LOCK" >/dev/null; then
     pass "R24 a higher version is built and published"
 else fail "R24 rc=$RC: $OUT"; fi
 
@@ -353,7 +354,7 @@ done
 jq --arg n "$LOCK" '.assets = [{name: $n, size: 1, digest: "sha256:00", state: "uploaded"}]' "$STORE/.meta/20260914-0950.json" >"$TMP/meta" && mv "$TMP/meta" "$STORE/.meta/20260914-0950.json"
 cut 20260914-0955
 release 20260914-0955
-if [ "$RC" -eq 0 ] && says "$OUT" "mica-podman amd64 5.8.6-2: build" && [ "$(pooldigest arm64 20260914-0955)" = "$(pooldigest arm64 20260914-0940)" ]; then
+if [ "$RC" -eq 0 ] && says "$OUT" "mica-podman amd64 $V: build" && [ "$(pooldigest arm64 20260914-0955)" = "$(pooldigest arm64 20260914-0940)" ]; then
     pass "R25 a previous release without recorded inputs is not a reuse source: everything is built"
 else fail "R25 rc=$RC: $OUT"; fi
 

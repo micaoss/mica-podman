@@ -16,7 +16,11 @@
 #   4. each such archive must be an upstream row of the Base lock pinned for a
 #      root named in deb/debian-depends, or a source row of locks/upstream.lock
 #      under the apt URI with the same columns; a recorded row that no longer
-#      resolves is refused.
+#      resolves is refused;
+#   5. every Debian dependency deb/mica-podman.control declares is satisfied,
+#      at its declared floor, by the version the root ships or the Base lock
+#      pins for our roots. The floors are declared, never derived from a live
+#      archive at build time.
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -124,6 +128,34 @@ for arch in amd64 arm64; do
         echo "base-check.sh: ${arch}: $(grep -c . "${WORK}/resolved-${arch}.sorted" || true) archive(s) the root lacks, ${from_base} pinned by mica-system-base, ${ours} recorded in locks/upstream.lock (mica-system-base ${TAG})"
     fi
 done
+# 5. The declared Depends against what the root ships and the Base lock pins.
+CONTROL="${REPO_ROOT}/deb/mica-podman.control"
+[ -f "${CONTROL}" ] || die "${CONTROL} does not exist"
+for arch in amd64 arm64; do
+    # name<TAB>version of everything available to this architecture's root.
+    { awk '/^Package: /{p=$2} /^Version: /{if (p != "") {print p "\t" $2; p=""}}' "${WORK}/status-${arch}"
+      awk -F'\t' -v a="${arch}" '$2 == a { print $1 "\t" $3 }' "${WORK}/base-rows"
+    } | LC_ALL=C sort -u >"${WORK}/available-${arch}"
+    while IFS= read -r dep; do
+        [ -n "${dep}" ] || continue
+        name="${dep%% *}"
+        case "${name}" in mica-*) continue ;; esac
+        floor=""
+        case "${dep}" in *'(>= '*) floor="${dep#*(>= }"; floor="${floor%)}" ;; esac
+        got="$(awk -F'\t' -v n="${name}" '$1 == n { print $2; exit }' "${WORK}/available-${arch}")"
+        [ -n "${got}" ] || {
+            printf 'base-check.sh: error: %s: deb/mica-podman.control depends on %s, which mica-system-base %s does not pin and the root does not ship\n' "${arch}" "${name}" "${TAG}" >&2
+            bad=1
+            continue
+        }
+        [ -z "${floor}" ] || dpkg --compare-versions "${got}" ge "${floor}" || {
+            printf 'base-check.sh: error: %s: deb/mica-podman.control needs %s (>= %s), and mica-system-base %s pins %s\n' "${arch}" "${name}" "${floor}" "${TAG}" "${got}" >&2
+            bad=1
+        }
+    done < <(sed -n 's/^Depends: //p' "${CONTROL}" | tr ',' '\n' | sed 's/^ *//; s/ *$//')
+    [ "${bad}" -ne 0 ] || echo "base-check.sh: ${arch}: every declared Depends is satisfied by mica-system-base ${TAG}"
+done
+
 stale="$(LC_ALL=C sort "${WORK}/resolved-all" | comm -13 - "${WORK}/recorded")"
 if [ -n "${stale}" ]; then
     printf 'base-check.sh: error: locks/upstream.lock records %s, which no longer resolves against mica-system-base %s\n' "${stale}" "${TAG}" >&2

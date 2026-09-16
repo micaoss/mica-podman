@@ -2,18 +2,11 @@
 # check=skip=InvalidDefaultArgInFrom
 # Stages, asserts and packs mica-podman (tools/package.sh). The binaries arrive
 # through the `bin` context, the configuration through `overlay`. Runs at the
-# target architecture on the mica-build-env base image so dpkg-shlibdeps resolves
-# against that architecture's libraries.
+# target architecture on the mica-build-env base image, and installs nothing: the
+# Depends are declared in mica-podman.control with their floors.
 ARG MICA_BUILD_BASE
 
 FROM ${MICA_BUILD_BASE} AS pack
-
-# Runtime libraries the payload links, so dpkg-shlibdeps can derive Depends.
-RUN --mount=type=cache,target=/var/cache/apt,id=apt-cache-deb-podman,sharing=locked \
-    --mount=type=cache,target=/var/lib/apt/lists,id=apt-lists-deb-podman,sharing=locked \
-    rm -f /etc/apt/apt.conf.d/docker-clean && \
-    apt-get update && apt-get install -y --no-install-recommends \
-        libjson-c5 libsubid5 libseccomp2 libcap2 libglib2.0-0t64
 
 COPY pack.sh /usr/local/bin/pack.sh
 COPY mica-podman.control copyright payload.manifest /in/

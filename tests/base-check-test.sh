@@ -26,12 +26,14 @@ cp tools/base-check.sh tools/inputs.sh tools/check-lock.sh "$FIX/tools/"
 cp locks/mica-build-env.lock "$FIX/locks/"
 cp locks/pins/mica-build-env.pin "$FIX/locks/pins/"
 printf 'app\n' >"$FIX/deb/debian-depends"
+depends() { printf 'Package: mica-podman\nVersion: 1-1\nDepends: %s\n' "$1" >"$FIX/deb/mica-podman.control"; }
+depends 'mica-system, liba (>= 1)' 
 
 rootfs() { # <arch> -> manifest digest of a one-layer root whose dpkg status names <arch>-root
     local d="$TMP/root-$1" ld m
     rm -rf "$d"
     mkdir -p "$d/var/lib/dpkg"
-    printf 'Package: %s-root\nStatus: install ok installed\n\n' "$1" >"$d/var/lib/dpkg/status"
+    printf 'Package: %s-root\nStatus: install ok installed\n\nPackage: libcommon\nStatus: install ok installed\nVersion: 2\n\n' "$1" >"$d/var/lib/dpkg/status"
     tar -C "$d" -czf "$TMP/layer.tgz" ./var
     ld="sha256:$(sha "$TMP/layer.tgz")"
     cp "$TMP/layer.tgz" "$REG/v2/micaoss/mica-system-base/blobs/$ld"
@@ -154,6 +156,26 @@ run
 if [ "$RC" -ne 0 ] && says "$OUT" "amd64: not pinned by mica-system-base $TAG for a root in deb/debian-depends" && says "$OUT" "liba	amd64	1	"; then
     pass "S11 an archive Base pins only for other roots is refused"
 else fail "S11 rc=$RC: $OUT"; fi
+
+publish "$TMP/base-rows"
+depends 'mica-system, liba (>= 2)'
+run
+if [ "$RC" -ne 0 ] && says "$OUT" "deb/mica-podman.control needs liba (>= 2)" && says "$OUT" "mica-system-base $TAG pins 1"; then
+    pass "S12 a Depends floor above the version Base pins is refused"
+else fail "S12 rc=$RC: $OUT"; fi
+
+depends 'mica-system, libz (>= 1)'
+run
+if [ "$RC" -ne 0 ] && says "$OUT" "deb/mica-podman.control depends on libz, which mica-system-base $TAG does not pin"; then
+    pass "S13 a Depends nothing pins or ships in the root is refused"
+else fail "S13 rc=$RC: $OUT"; fi
+
+depends 'mica-system, liba (>= 1), libcommon (>= 2)'
+run
+if [ "$RC" -eq 0 ] && says "$OUT" "amd64: every declared Depends is satisfied"; then
+    pass "S14 a Depends the root itself ships is satisfied from its dpkg status"
+else fail "S14 rc=$RC: $OUT"; fi
+depends 'mica-system, liba (>= 1)'
 
 echo "RESULT: $FAIL_N failed, $PASS_N passed"
 [ "$FAIL_N" -eq 0 ]

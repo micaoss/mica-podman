@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-09-16 00:20 [fix]
+
+The pack stage installs nothing (coordinator, item 2 of the unpinned-archive
+finding). `deb/mica-podman.control` declares every Debian dependency with its
+floor, `${shlibs:Depends}` and `dpkg-shlibdeps` are gone, and `deb/Dockerfile`
+no longer runs `apt-get` on every package build: a floor read from whatever the
+archive served that day was an unpinned input inside a declared version.
+`make base-check` now also requires every declared Depends to be satisfied, at
+its floor, by the version the Base root ships or the Base lock pins for our
+roots. The floors are the ones dpkg-shlibdeps derived (identical on amd64 and
+arm64); the duplicate bare `libsystemd0` is gone. The archive bytes change, so
+the version is `5.8.6-2`. The three `apt-get` blocks of the engine Dockerfile
+(c, rust and go stages) stay until mica-build-env carries those packages.
+
 ## 2026-09-15 21:30 [fix]
 
 Three `| head -n1` pipelines are gone: under `pipefail` a consumer that exits

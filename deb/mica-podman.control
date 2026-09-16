@@ -1,11 +1,11 @@
 Package: mica-podman
-Version: 5.8.6-1
+Version: 5.8.6-2
 X-Mica-Source-Date-Epoch: 1786640584
 Architecture: @ARCH@
 Maintainer: Mica OS <hi@micaos.dev>
 Section: admin
 Priority: optional
-Depends: mica-system, nftables, libsystemd0, ${shlibs:Depends}
+Depends: mica-system, nftables, libc6 (>= 2.39), libcap2 (>= 1:2.10), libgcc-s1 (>= 4.2), libglib2.0-0t64 (>= 2.76.0), libjson-c5 (>= 0.15), libseccomp2 (>= 2.6.0), libsubid5 (>= 1:4.16.0), libsystemd0 (>= 246)
 Description: Mica OS container engine
  podman and quadlet 5.8.6, crun 1.29.1, conmon 2.2.1, netavark and
  aardvark-dns 2.1.0 and catatonit 0.2.1, built from pinned upstream source,

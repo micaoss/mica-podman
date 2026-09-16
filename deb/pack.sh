@@ -30,7 +30,7 @@ done
 [[ "${MICA_DEB_SOURCE_REPO:-}" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]] || die "MICA_DEB_SOURCE_REPO is not a repository name"
 [ -d "${ROOT}" ] && [ -n "$(ls -A "${ROOT}")" ] || die "--root ${ROOT} is not a non-empty directory"
 [ ! -e "${ROOT}/DEBIAN" ] || die "--root ${ROOT} already carries DEBIAN"
-[ "${ARCH}" = "$(dpkg --print-architecture)" ] || die "--arch ${ARCH} in a $(dpkg --print-architecture) container; dpkg-shlibdeps would resolve the wrong libraries"
+[ "${ARCH}" = "$(dpkg --print-architecture)" ] || die "--arch ${ARCH} in a $(dpkg --print-architecture) container"
 
 for f in Package Version Architecture Maintainer Section Priority Description; do
     grep -c "^${f}:" "${CONTROL}" >/dev/null || die "${CONTROL} declares no ${f}"
@@ -51,19 +51,12 @@ mkdir -p "${PKG}/DEBIAN"
 cp -a "${ROOT}/." "${PKG}/"
 printf 'Source: %s\n\nPackage: %s\nArchitecture: %s\n' "${PACKAGE}" "${PACKAGE}" "${ARCH}" >"${WORK}/debian/control"
 
-if grep -c '^Depends:.*\${shlibs:Depends}' "${WORK}/control" >/dev/null; then
-    elves=()
-    while IFS= read -r -d '' f; do
-        case "$(file -b "${f}")" in ELF*) elves+=("${f}") ;; esac
-    done < <(find "${PKG}" -path "${PKG}/DEBIAN" -prune -o -type f -print0)
-    [ "${#elves[@]}" -gt 0 ] || die "\${shlibs:Depends} is requested and no ELF is staged"
-    shlibs="$(cd "${WORK}" && DEB_HOST_ARCH="${ARCH}" DEB_BUILD_ARCH="${ARCH}" dpkg-shlibdeps -O "${elves[@]}" | sed -n 's/^shlibs:Depends=//p')"
-    [ -n "${shlibs}" ] || die "dpkg-shlibdeps resolved no dependency"
-    awk -v rep="${shlibs}" 'BEGIN { tok = "${shlibs:Depends}" }
-        /^Depends:/ { while ((i = index($0, tok)) > 0) $0 = substr($0, 1, i - 1) rep substr($0, i + length(tok)) }
-        { print }' "${WORK}/control" >"${WORK}/control.subst"
-    mv "${WORK}/control.subst" "${WORK}/control"
-fi
+# Depends are declared in the template with their floors, verified against the
+# versions mica-system-base pins (tools/base-check.sh). Nothing is derived here:
+# a floor read from a live archive would be an unpinned input.
+case "$(sed -n 's/^Depends: //p' "${WORK}/control")" in
+*'${'*) die "${CONTROL} Depends carries a substitution variable; declare every dependency and its floor" ;;
+esac
 
 # Installed-Size as dpkg-gencontrol counts it: ceil(bytes/1024) per file or link, 1 per directory.
 size="$(cd "${PKG}" && find . -mindepth 1 -path ./DEBIAN -prune -o -printf '%y %s\n' |
