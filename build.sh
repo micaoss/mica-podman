@@ -29,11 +29,23 @@ done
 rm -rf "${OUT}"
 mkdir -p "${OUT}"
 
+# The Debian build packages of every stage, by sha256, fetched and verified here.
+# check first: a closure resolved against other build-env images is refused.
+bash "${HERE}/tools/dev-pins.sh" check
+PINS="${HERE}/_out/pins/${MICA_ARCH}"
+bash "${HERE}/tools/dev-pins.sh" fetch "${MICA_ARCH}" "${PINS}"
+PIN_ARGS=()
+for stage in c rust go; do
+    PIN_ARGS+=(--build-arg "MICA_PINS_${stage^^}=$(bash "${HERE}/tools/dev-pins.sh" shas "${stage}" "${MICA_ARCH}" | tr '\n' ' ')")
+done
+
 docker buildx build --builder "${BUILDER}" \
     --platform "linux/${MICA_ARCH}" ${NO_CACHE[@]+"${NO_CACHE[@]}"} \
     "${IMAGE_ARGS[@]}" \
     --build-arg "ELF_ARCH=${ELF_ARCH}" \
     --build-arg "SOURCE_DATE_EPOCH=$(bash "${HERE}/tools/version.sh" epoch)" \
+    "${PIN_ARGS[@]}" \
+    --build-context "pins=${PINS}" \
     -f "${HERE}/Dockerfile" \
     -o "type=local,dest=${OUT}" \
     "${HERE}"

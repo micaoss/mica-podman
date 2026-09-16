@@ -2,7 +2,7 @@
 
 MICA_ARCH ?= arm64
 
-.PHONY: help inputs podman podman-pins podman-pins-test stamp-test inputs-test lock-test version-test package-inputs-test package-test release-test base-check base-check-test deb pool package-gate publish offline offline-test lint check
+.PHONY: help inputs podman podman-pins dev-pins podman-pins-test stamp-test inputs-test lock-test version-test package-inputs-test dev-pins-test package-test release-test base-check base-check-test deb pool package-gate publish offline offline-test lint check
 
 help:
 	@echo "  inputs              verify every lock in locks/ against its pinned release (network)"
@@ -14,7 +14,8 @@ help:
 	@echo "  publish             publish _out/debs as the pools and assets of the published release TAG=<YYYYMMDD-HHMM> (release workflow only)"
 	@echo "  base-check          every Debian package mica-podman needs comes from the pinned mica-system-base release (network)"
 	@echo "  podman-pins         are the upstream tags in locks/upstream.lock current? (network)"
-	@echo "  check               lint, podman-pins-test, stamp-test, inputs-test, lock-test, version-test, package-inputs-test, package-test, release-test, base-check-test, offline-test"
+	@echo "  dev-pins            re-resolve the Debian build closure of the engine stages (network, docker)"
+	@echo "  check               lint, podman-pins-test, stamp-test, inputs-test, lock-test, version-test, package-inputs-test, dev-pins-test, package-test, release-test, base-check-test, offline-test"
 
 inputs:
 	bash tools/inputs.sh verify
@@ -41,6 +42,9 @@ offline:
 podman-pins:
 	bash check-pins.sh
 
+dev-pins:
+	bash tools/dev-pins.sh resolve
+
 podman-pins-test:
 	bash tests/podman-pins-test.sh
 
@@ -58,6 +62,9 @@ version-test:
 
 package-inputs-test:
 	bash tests/package-inputs-test.sh
+
+dev-pins-test:
+	bash tests/dev-pins-test.sh
 
 package-test:
 	bash tests/package-test.sh
@@ -77,4 +84,4 @@ base-check-test:
 lint:
 	bash tests/shell-lint.sh
 
-check: lint podman-pins-test stamp-test inputs-test lock-test version-test package-inputs-test package-test release-test base-check-test offline-test
+check: lint podman-pins-test stamp-test inputs-test lock-test version-test package-inputs-test dev-pins-test package-test release-test base-check-test offline-test

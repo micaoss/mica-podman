@@ -1,0 +1,8 @@
+# The Debian snapshot the engine stages take their pinned build packages from.
+# It must not be older than the mica-build-env images this closure is resolved
+# against (20260916-0735, built 07:35 UTC): their own packages come from the
+# archive of that moment, and apt refuses to resolve downgrades against them.
+# The Base apt row (an older snapshot, for the root) cannot be used for that
+# reason; the runtime contract is kept by the declared Depends floors, which
+# base-check verifies against the versions Base pins.
+deb [check-valid-until=no] https://snapshot.debian.org/archive/debian/20260916T120000Z trixie main

@@ -1,0 +1,7 @@
+# The packages the go stage links against; tools/dev-pins.sh resolves their closure.
+build-essential
+pkgconf
+libseccomp-dev
+libsubid-dev
+libsqlite3-dev
+libsystemd-dev

@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-09-16 09:00 [progress]
+
+No stage of the build reads a live Debian archive any more (the second half of
+the unpinned-archive finding; plan `20260916-0855-pinned-build-closure`). The c,
+rust and go stages install their Debian packages from archives pinned by sha256
+as `source` rows of `locks/upstream.lock`: 40 per architecture, 15.0 MB on
+amd64, resolved by `tools/dev-pins.sh` against each stage image's own dpkg
+status and fetched and verified by `build.sh`. `pins/resolved-for` records the
+build-env release, images and snapshot they were resolved against, and
+`tools/dev-pins.sh check` (run by `build.sh` and `make check` through
+`tests/dev-pins-test.sh`) refuses a build against other inputs. mica-build-env
+moves to `20260916-0735` in the same step, as the closure must be resolved
+against the images that are used. The snapshot is not the Base apt row's: the
+build-env images carry newer packages, so apt would resolve downgrades against
+them; the runtime contract stays with the declared Depends floors, which
+base-check verifies against the versions Base pins. The engine binaries are
+byte-identical to the ones built before, from the live archive on the previous
+images, on amd64: seven of seven.
+
 ## 2026-09-16 00:20 [fix]
 
 The pack stage installs nothing (coordinator, item 2 of the unpinned-archive

@@ -1,0 +1,7 @@
+# The packages the c stage links against; tools/dev-pins.sh resolves their closure.
+libseccomp-dev
+libcap-dev
+libjson-c-dev
+libyajl-dev
+libglib2.0-dev
+libsystemd-dev

@@ -36,6 +36,7 @@ enables from the `container.enabled` setting.
 | `tests/package-gate.sh` | identity, payload, copyright, no conffiles or enablement, byte-identical engine and archive rebuilds |
 | `tools/release.sh` | the pools on ghcr.io and `mica-podman.lock` on the GitHub Release: identity checks, never replaced, anonymous read-back |
 | `tools/inputs.sh`, `tools/check-lock.sh` | `locks/`: the file rules, release verification, image references |
+| `tools/dev-pins.sh`, `pins/` | the Debian build closure of the engine stages, pinned by sha256 |
 
 ## CI and releases
 
@@ -96,6 +97,16 @@ build) bumps the revision. Bump the epoch together with the version.
 a lower version is refused, a higher one is built, and the same version must
 carry the same `mica.inputs` (`tools/package-inputs.sh`) and rebuild to the
 published bytes, which the release then reuses by digest.
+
+Nothing in the build reads a live Debian archive. Each engine stage declares its
+packages in `pins/<stage>.roots`; `make dev-pins` resolves their closure against
+the mica-build-env images the stages build FROM and writes one `source` row per
+archive in `locks/upstream.lock`, with the install order in `pins/<stage>.<arch>`
+and the inputs it resolved against in `pins/resolved-for`. `build.sh` fetches
+and verifies each archive by sha256 and the stages install them with `dpkg`;
+`tools/dev-pins.sh check` refuses a build whose build-env images or snapshot are
+not the ones the closure was resolved against, so a build-env move fails with
+"re-resolve" instead of mixing versions.
 
 Edit the component's `git` row of `locks/upstream.lock`: its tag and that tag's
 commit. The build clones the tag and refuses another commit.

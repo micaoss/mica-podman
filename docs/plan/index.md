@@ -5,3 +5,4 @@
 - [x] [**20260914-2047-offline-build Offline build target**](20260914-2047-offline-build.md) `2026-09-14`
 - [x] [**20260915-0109-release-lock Release lock migration (stage 3)**](20260915-0109-release-lock.md) `2026-09-15`
 - [x] [**20260915-1042-package-versions Packages locked by their own version**](20260915-1042-package-versions.md) `2026-09-15`
+- [-] [**20260916-0756-pinned-build-closure No consumer-time apt in the build**](20260916-0756-pinned-build-closure.md) `2026-09-16`

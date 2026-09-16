@@ -2,6 +2,9 @@
 
 # The container engine from pinned upstream source: src fetches and verifies,
 # c/rust/go stages compile for the target, verify asserts, artifact exports.
+# Every stage installs its Debian build packages from the archives
+# locks/upstream.lock pins, through the `pins` context (build.sh fetches and
+# verifies them); nothing here reads a live archive.
 # Separate builder stages keep one component's -dev list out of the others'
 # cache keys. The bases are the mica-build-env images of
 # locks/mica-build-env.lock (build.sh passes them; no defaults).
@@ -33,14 +36,11 @@ RUN --mount=type=cache,target=/root/.cache/git \
     fetch podman; fetch crun; fetch conmon; fetch netavark; fetch aardvark-dns; fetch catatonit
 
 FROM ${MICA_BUILD_C} AS c-build
-RUN --mount=type=cache,target=/var/cache/apt,id=apt-cache-c,sharing=locked \
-    --mount=type=cache,target=/var/lib/apt/lists,id=apt-lists-c,sharing=locked \
-    rm -f /etc/apt/apt.conf.d/docker-clean && \
-    apt-get update && apt-get install -y --no-install-recommends \
-        libseccomp-dev libcap-dev \
-        libjson-c-dev libyajl-dev \
-        libglib2.0-dev \
-        libsystemd-dev
+ARG MICA_PINS_C
+RUN --mount=type=bind,from=pins,target=/pins \
+    set -eu; [ -n "${MICA_PINS_C}" ] || { echo "error: MICA_PINS_C is empty; build.sh passes the pinned closure" >&2; exit 1; }; \
+    set -- ; for sha in ${MICA_PINS_C}; do set -- "$@" "/pins/${sha}.deb"; done; \
+    dpkg --install "$@"
 COPY --from=src /src/crun /src/crun
 COPY --from=src /src/conmon /src/conmon
 COPY --from=src /src/catatonit /src/catatonit
@@ -73,11 +73,11 @@ RUN --mount=type=cache,target=/ccache,id=ccache-c \
     install -m0755 catatonit /out/catatonit
 
 FROM ${MICA_BUILD_RUST} AS rust-build
-RUN --mount=type=cache,target=/var/cache/apt,id=apt-cache-rust,sharing=locked \
-    --mount=type=cache,target=/var/lib/apt/lists,id=apt-lists-rust,sharing=locked \
-    rm -f /etc/apt/apt.conf.d/docker-clean && \
-    apt-get update && apt-get install -y --no-install-recommends \
-        protobuf-compiler pkgconf
+ARG MICA_PINS_RUST
+RUN --mount=type=bind,from=pins,target=/pins \
+    set -eu; [ -n "${MICA_PINS_RUST}" ] || { echo "error: MICA_PINS_RUST is empty; build.sh passes the pinned closure" >&2; exit 1; }; \
+    set -- ; for sha in ${MICA_PINS_RUST}; do set -- "$@" "/pins/${sha}.deb"; done; \
+    dpkg --install "$@"
 COPY --from=src /src/netavark /src/netavark
 COPY --from=src /src/aardvark-dns /src/aardvark-dns
 
@@ -101,12 +101,11 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry,id=cargo-registry \
     install -m0755 target/release/aardvark-dns /out/aardvark-dns
 
 FROM ${MICA_BUILD_GO} AS go-build
-RUN --mount=type=cache,target=/var/cache/apt,id=apt-cache-go,sharing=locked \
-    --mount=type=cache,target=/var/lib/apt/lists,id=apt-lists-go,sharing=locked \
-    rm -f /etc/apt/apt.conf.d/docker-clean && \
-    apt-get update && apt-get install -y --no-install-recommends \
-        build-essential pkgconf \
-        libseccomp-dev libsubid-dev libsqlite3-dev libsystemd-dev
+ARG MICA_PINS_GO
+RUN --mount=type=bind,from=pins,target=/pins \
+    set -eu; [ -n "${MICA_PINS_GO}" ] || { echo "error: MICA_PINS_GO is empty; build.sh passes the pinned closure" >&2; exit 1; }; \
+    set -- ; for sha in ${MICA_PINS_GO}; do set -- "$@" "/pins/${sha}.deb"; done; \
+    dpkg --install "$@"
 COPY --from=src /src/podman /src/podman
 
 # openpgp avoids gpgme and GnuPG; btrfs and devicemapper are not used (overlay).

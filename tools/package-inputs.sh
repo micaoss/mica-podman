@@ -10,7 +10,8 @@
 # The manifest, as `<kind> <name> <value>` lines: `file <path> <sha256>` for the
 # tracked files of the engine build and the pack (locks/upstream.lock, the
 # Dockerfile, build.sh, tools/package.sh, tools/stamp.sh, tools/version.sh,
-# deb/ with the declared version and epoch, overlay/), and `arch <arch>`. The
+# tools/dev-pins.sh, deb/ with the declared version and epoch, overlay/, and
+# pins/ with the Debian build closure), and `arch <arch>`. The
 # build-env images are not inputs: a toolchain move that changes the bytes is
 # caught by the byte comparison.
 set -euo pipefail
@@ -25,7 +26,7 @@ cd "${REPO_ROOT}"
 
 manifest() {
     git ls-files -z -- locks/upstream.lock Dockerfile Dockerfile.dockerignore build.sh \
-        tools/package.sh tools/stamp.sh tools/version.sh deb overlay |
+        tools/package.sh tools/stamp.sh tools/version.sh tools/dev-pins.sh deb overlay pins |
         while IFS= read -r -d '' f; do
             if [ -L "${f}" ]; then printf 'link %s %s\n' "${f}" "$(readlink "${f}")"; else printf 'file %s %s\n' "${f}" "$(sha256sum "${f}" | cut -d' ' -f1)"; fi
         done

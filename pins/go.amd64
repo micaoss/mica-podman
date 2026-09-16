@@ -1,0 +1,8 @@
+libcap2
+libsqlite3-0
+libcap-dev
+libseccomp-dev
+libsqlite3-dev
+libsubid5
+libsubid-dev
+libsystemd-dev
