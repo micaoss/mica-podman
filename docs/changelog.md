@@ -1,5 +1,26 @@
 # Changelog
 
+## 2026-09-20 10:30 [note]
+
+On a kernel without `CONFIG_MEMCG` (uefi-x64 today), traced in the sources this
+repository pins rather than in upstream documentation: `podman run --memory`
+fails loudly and the container does not start. podman's discard-with-a-warning
+path is `verifyContainerResourcesCgroupV1`
+(`pkg/specgen/generate/validate_linux.go:47`); we run the cgroup v2 branch at
+line 172, which discards no memory limit. crun then sends `MemoryMax` as a
+transient scope property and calls `update_cgroup_resources` anyway, ending in
+`write_memory` against `memory.max`, which does not exist without the
+controller: ENOENT, an OCI runtime failure.
+
+An unlimited container runs normally; only bounding memory fails, at run time
+on the device. The silent half is accounting, not limits: `podman stats` reads
+the same controller and reports an empty memory figure without warning. Nothing
+this package ships assumes memory accounting -- no memory key in
+`containers.conf`, no resource directive in `etc-containers-systemd.mount` --
+so the exposed surface is a `MemoryMax=` an operator writes in their own Quadlet
+unit. Whether the kernel floor gains `MEMCG` or the difference is documented is
+the user's decision, with mica-boards asked what the floor costs.
+
 ## 2026-09-20 09:30 [decision]
 
 Rootless is not supported, recorded with its evidence (asked by the coordinator
