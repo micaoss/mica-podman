@@ -1,5 +1,32 @@
 # Changelog
 
+## 2026-09-20 12:00 [note]
+
+Measured on a booted uefi-x64 guest (mica-build), against the source reading of
+`218ed9c`. Two corrections to keep beside it.
+
+The controller list is not proof of a limit. `/sys/fs/cgroup/cgroup.controllers`
+on that guest reads `cpuset cpu io hugetlb pids rdma misc`, and `cpu.max` is
+still absent: `CONFIG_CFS_BANDWIDTH` is what creates the file, not what enables
+the controller. `podman run --cpus 0.5` fails with ``crun: open `cpu.max` for
+writing: No such file or directory`` and `--memory 64m` fails the same way on
+`memory.max`, exactly where this repository traced them. Anyone writing a
+run-time probe for "can this system bound a container" would naturally read the
+controller list first, and for cpu that check answers yes while the limit
+cannot be applied. Assert the knob file, not the controller name.
+
+The prediction about `podman stats` was wrong, in the dangerous direction. This
+repository predicted an empty memory figure, flagged as its weakest evidence
+because it was inferred from which controller the reader reads rather than from
+a run. The guest printed `0B / 2.028GB` with `MEM % 0.00%`: a usage of zero
+meaning "not measured" beside a limit that is the machine's RAM. An empty field
+invites a question; a plausible number does not. Also measured there: a
+container runs (`podman run --rm busybox true`, exit 0), the hierarchy is
+cgroup2 unified, so the v2 validation branch this repository's conclusions rest
+on is the one that runs, and after a container start the ruleset carries a
+`table inet netavark`, so the fallback-to-no-firewall path was not taken on that
+image.
+
 ## 2026-09-20 10:30 [note]
 
 On a kernel without `CONFIG_MEMCG` (uefi-x64 today), traced in the sources this
