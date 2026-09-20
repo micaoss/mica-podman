@@ -70,6 +70,21 @@ writable home or an explicit rootless storage path, lingering for the user
 manager, and unprivileged user namespaces enabled by the board kernel; it is
 not supported until a test runs a container as `mica` in a composed image.
 
+The subordinate ranges have no rootful use here either, which is the question
+to ask before calling them vestigial. The one rootful consumer of `/etc/subuid`
+in podman is `--userns=auto`, and it does not read the range of the invoking
+user: not rootless and with no `root-auto-userns-user` set, the store looks up
+`RootAutoUserNsUser`, the constant `"containers"`
+(`vendor/go.podman.io/storage/store.go:3924`, reached from
+`getAdditionalSubIDs` at `vendor/go.podman.io/storage/userns.go:44-47`, the
+value carried from `storage.conf` through
+`vendor/go.podman.io/storage/types/options.go:483`). `storage.conf` here does
+not set it, and the Base root's `/etc/subuid` names `mica` and not
+`containers`, so `--userns=auto` would fail to find mappings rather than use
+the allocation. Setting `root-auto-userns-user` in this package's
+`storage.conf` is what it would take to give that range a rootful purpose;
+nothing asks for one today.
+
 | Path | Role |
 |---|---|
 | `build.sh`, `Dockerfile` | the engine binaries |

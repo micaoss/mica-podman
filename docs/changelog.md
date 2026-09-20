@@ -1,5 +1,30 @@
 # Changelog
 
+## 2026-09-20 19:51 [note]
+
+One route left open by the rootless record of `502fcdf`, closed in the pinned
+source: **the `mica:100000:65536` allocation in the Base root has no rootful
+use here either.**
+
+The only rootful consumer of `/etc/subuid` in podman is `--userns=auto`, and it
+does not read the invoking user's range. In podman `v5.8.6` (`a859fc6`),
+`getAdditionalSubIDs` (`vendor/go.podman.io/storage/userns.go:44-47`) takes the
+username from the store, and when it is empty and the process is not rootless
+it uses `RootAutoUserNsUser` -- the constant `"containers"`
+(`vendor/go.podman.io/storage/store.go:3924`). The store gets it from
+`storage.conf`'s `root-auto-userns-user`
+(`vendor/go.podman.io/storage/types/options.go:483`), which this package's
+`storage.conf` does not set. The Base root's `/etc/subuid` names `mica`, not
+`containers`, so `--userns=auto` would log *cannot find mappings for user
+"containers"* rather than use the range.
+
+So the allocation serves neither mode as the image is configured, and the
+question of what to do with it is `mica-system-base`'s. Recorded here because
+the fact that decides it is half in this package's `storage.conf` and half in
+the engine's vendored store, and because **"it is only for rootless" was an
+assumption worth checking before anybody called it vestigial** -- one setting
+in a file this repository owns would give it a rootful purpose.
+
 ## 2026-09-20 14:41 [change]
 
 Two defects of the same family, found by `mica-boards` in its own tree and
