@@ -29,8 +29,19 @@ The package also carries `/etc/containers` (storage and network state under
 `/mica/containers`) and `etc-containers-systemd.mount`, which mica-core
 enables from the `container.enabled` setting.
 
-Rootless is not a supported mode (2026-09-20). The package configures the
-system engine only: the systemd cgroup manager, a root-owned graphroot under
+`storage.conf`'s `mountopt = "nodev"` agrees with the mount mica-system-base
+provides (`bind,private,nosuid,nodev`). It is a default, not a hardening
+measure, and it is not a security boundary: the engine is rootful, so a caller
+who can run podman is already root and can bind what it likes or put the
+graphroot elsewhere. Do not tighten it believing it confines anything, and do
+not remove it -- removing it changes what containers can do, for nothing. The
+mount options exist to be the same on every board; that is a uniformity
+property, not a confinement one.
+
+Rootless is not a supported mode (2026-09-20). It is also coherent with the
+access model rather than merely unimplemented: podman access implies root
+implies ssh on these devices, so there is no unprivileged-user story for the
+engine to serve. The package configures the system engine only: the systemd cgroup manager, a root-owned graphroot under
 `/mica/containers`, the system Quadlet directory, and `libsubid5` without
 `uidmap`. A container started by the operator account fails loudly in the
 user-namespace setup rather than running as root, and `docker run` fails the

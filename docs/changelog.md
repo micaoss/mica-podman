@@ -1,5 +1,27 @@
 # Changelog
 
+## 2026-09-20 13:00 [note]
+
+The graphroot mount options are a default, not a boundary (user ruling). The
+mount mica-system-base provides is `bind,private,nosuid,nodev` and
+`storage.conf` agrees with `mountopt = "nodev"`; both stay, and neither is a
+security measure. The engine is rootful, so a caller who can run podman is
+already root: the options constrain nobody who is not already unconstrained.
+The note exists so the next reader does not reason from the appearance -- adding
+`noexec` for consistency and removing them as useless would be wrong for the
+same reason.
+
+What the fstab and `findmnt` checks are for survives the ruling, with a
+different sentence beside them: they prove that the data filesystem and its
+options are the same on every board. `noexec` on one board's data would stop
+containers executing anything out of the graphroot, with an identical kernel
+config and nothing in a symbol table to see it.
+
+The same sentence also grounds the rootless record of 502fcdf: podman access
+implies root implies ssh, so there is no unprivileged-user story on these
+devices. Rootless being unsupported is coherent with the access model, not
+merely unimplemented.
+
 ## 2026-09-20 12:00 [note]
 
 Measured on a booted uefi-x64 guest (mica-build), against the source reading of
