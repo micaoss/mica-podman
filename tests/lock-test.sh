@@ -37,5 +37,29 @@ while IFS= read -r path; do
     printf '%s\n' "${listed[@]}" | grep -Fx -- "${path}" >/dev/null || fail "${path} is a vector expected.tsv does not list"
 done < <(cd "${V}" && { find lock upstream vectors-pin -type f; find pins -mindepth 2 -maxdepth 2 -type d; } | LC_ALL=C sort)
 
+# 9.3: every refused vector here names the valid vector it was written against,
+# and that vector is here and passes. It bounds where a refusal can come from:
+# the surroundings of the defect are a lock this reader accepts, so the refusal
+# is the edit. It does not prove the edit breaks one rule and not two -- that
+# needs the edited line read, and `a refused vector that could be refused by two
+# rules tests neither` (mica-core, 2026-09-20).
+declare -A RESULT_OF=()
+while IFS=$'\t' read -r path result rule mode; do
+    case "${path}" in '#'* | '') continue ;; esac
+    RESULT_OF["${path}"]="${result}"
+done <"${V}/expected.tsv"
+siblings=0
+while IFS=$'\t' read -r refused relation sibling; do
+    case "${refused}" in '#'* | '') continue ;; esac
+    siblings=$((siblings + 1))
+    [ -n "${RESULT_OF[${refused}]-}" ] || fail "derived-from.tsv names ${refused}, which expected.tsv does not list"
+    if [ "${RESULT_OF[${sibling}]-}" = valid ]; then
+        pass "${refused}: ${relation} ${sibling}, which is here and valid"
+    else
+        fail "${refused} is written against ${sibling}, which is not a valid vector of this copy"
+    fi
+done <"${V}/derived-from.tsv"
+[ "${siblings}" -gt 0 ] || fail "derived-from.tsv names no sibling; every refused lock vector declares one"
+
 echo "RESULT: ${FAIL_N} failed, ${PASS_N} passed"
 [ "${FAIL_N}" -eq 0 ]
