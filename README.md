@@ -29,6 +29,25 @@ The package also carries `/etc/containers` (storage and network state under
 `/mica/containers`) and `etc-containers-systemd.mount`, which mica-core
 enables from the `container.enabled` setting.
 
+The firewall ruleset is netavark's alone, and that was decided rather than
+left to happen (measured in the pinned Base root, 2026-09-20). `nftables`
+1.1.3-1 is in the Base root at `Priority: important`, so `Depends: nftables`
+here names the `nft` binary netavark execs -- netavark 2.1.0 picks
+firewalld, then nftables, then none, and the binary shipped here links no
+nftables library -- and does not put the package in the root. `nftables.service`
+is shipped by that package, is `WantedBy=sysinit.target`, and is **disabled by
+mica-system-base's own preset**, `/usr/lib/systemd/system-preset/50-mica-nftables.preset`:
+`disable nftables.service`. Nothing reads `/etc/nftables.conf` at boot.
+
+Do not enable it. Its `ExecStart` is `nft -f /etc/nftables.conf`, whose first
+statement in Debian's shipped conffile is `flush ruleset`, and its `ExecStop`
+is `nft flush ruleset`: enabling the unit means wiping netavark's ruleset on
+reload, restart and shutdown. `mica-build` drops `/etc/nftables.conf` from the
+composed root, which makes that mistake **loud** -- the oneshot fails on a
+missing file and takes `sysinit.target` with it -- where keeping the file would
+have made it silent. That inverts the usual shape of a dropped configuration
+file, which is a binary that behaves differently and says nothing.
+
 `storage.conf`'s `mountopt = "nodev"` agrees with the mount mica-system-base
 provides (`bind,private,nosuid,nodev`). It is a default, not a hardening
 measure, and it is not a security boundary: the engine is rootful, so a caller

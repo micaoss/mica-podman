@@ -1,5 +1,35 @@
 # Changelog
 
+## 2026-09-20 14:30 [note]
+
+`/etc/nftables.conf` is dropped from the composed root while `/usr/sbin/nft` is
+carried (`mica-build`'s triage, routed here). Answered from the pinned Base
+root rather than from judgement, and the answer is that a static ruleset was
+deliberately never meant to exist.
+
+Measured in `mica-system-base` `20260915-1102`, `rootfs` amd64
+(`sha256:f7cd1ab0...`): `nftables` 1.1.3-1 is installed at `Priority:
+important`, so it is in the root as part of the base system and `Depends:
+nftables` here names the binary rather than putting the package there.
+`nftables.service` is present, `WantedBy=sysinit.target`, not masked, and not
+enabled -- and it is not enabled because Base ships
+`/usr/lib/systemd/system-preset/50-mica-nftables.preset` reading `disable
+nftables.service`. The decision is recorded in the root itself, in a file
+whose whole content is one line. `/var/lib/systemd/deb-systemd-helper-enabled/nftables.service.dsh-also`
+names where the enable symlink would go and it is not there.
+
+So: nothing reads the file at boot, netavark owns the ruleset outright, and
+the drop is inert. The part worth keeping beside that: **enabling the unit
+would not be neutral, it would be destructive.** `ExecStart` is
+`nft -f /etc/nftables.conf`, whose first statement in Debian's conffile is
+`flush ruleset`, and `ExecStop` is `nft flush ruleset` -- so a reload, restart
+or shutdown of a unit somebody enabled "for completeness" wipes netavark's
+rules. With the file dropped that mistake fails loudly at `sysinit.target`
+instead. **The drop converts a silent-harm path into a loud one, which is the
+opposite of the shape the triage was looking for**: the general worry is a
+binary that behaves differently and says nothing when its configuration is
+absent, and here the absence is what makes it speak.
+
 ## 2026-09-20 14:28 [change]
 
 The pin and the copy move together, and they moved: `74055c7`, which carries
