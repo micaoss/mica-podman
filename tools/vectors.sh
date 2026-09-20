@@ -37,9 +37,15 @@
 #   against a form neither read nor written here.
 #
 #   A kind no valid lock of this format carries is not a foreign kind but the
-#   `kind-unknown` refusal itself, so those vectors stay ours. A vector whose
-#   mode is not one of check-lock.sh's three (repos/, which belongs to
-#   tools/repos.sh) has no reader here at all.
+#   `kind-unknown` refusal itself, so those vectors stay ours.
+#
+#   A vector family this repository has no reader for is the one thing that
+#   cannot be derived from the file, because having no reader is a fact about
+#   this tree. So it is named below WITH ITS REASON, and a family that is
+#   neither read nor named is a LOUD failure rather than a silent exclusion:
+#   the mode comes from the first path component, and a floor that drops what
+#   it does not recognise would lose a new family exactly the way a copy loses
+#   a new vector. vectors-pin/ appeared this way and had to be looked at.
 #
 # No family is named in this file. Pin a scoped producer, or a producer whose
 # lock carries a kind this one does not, and those vectors become required on
@@ -113,6 +119,11 @@ tar -xzf "${WORK}/vectors.tar.gz" -C "${C}" --strip-components=5 --wildcards "*/
 [ -f "${C}/derived-from.tsv" ] || die "${REPOSITORY} ${COMMIT} has no derived-from.tsv; which valid vector a refused one is written against is what decides whether it is owed here (9.3)"
 
 # The rows of a lock, its release field and the repository it belongs to.
+# The vector families this repository has no reader for, and why. Anything
+# else outside check-lock.sh's three modes and this tool's own pin reader stops
+# the run.
+declare -A NO_READER=([repos]="the repos/ source cache is tools/repos.sh's, and this repository has neither")
+
 # 1.0: a scoped release is <scope>.<release>.
 SCOPED_RELEASE_RE='^[a-z0-9][a-z0-9.+-]*\.[0-9]{8}-[0-9]{4}$'
 kinds_of() { awk -F'\t' 'NR > 1 && $0 !~ /^#/ && NF { print $1 }' "$1"; }
@@ -178,7 +189,14 @@ required() {
     local path="$1" result="$2" mode="${path%%/*}" f k r home locks=() pins=()
     # vectors-pin/ is read by the pin reader above, which this repository has.
     [ "${mode}" != vectors-pin ] || return 0
-    case "${mode}" in lock | upstream | pins) ;; *) return 1 ;; esac
+    case "${mode}" in
+    lock | upstream | pins) ;;
+    *)
+        [ -n "${NO_READER[${mode}]-}" ] ||
+            die "${REPOSITORY} ${COMMIT} has the vector family '${mode}/', which nothing here reads and tools/vectors.sh does not name. Implement a reader for it or record why there is none, in NO_READER; a family dropped for being unrecognised is the silent gap this tool exists to close"
+        return 1
+        ;;
+    esac
     # A refused vector is owed exactly when the valid vector it was written
     # against is owed.
     if [ "${result}" != valid ] && [ -n "${SIBLING[${path}]-}" ]; then
@@ -245,6 +263,7 @@ derivation="pins $(printf '%s\n' "${PRODUCERS[@]}" | sort | paste -sd, -)"
 derivation="${derivation}; kinds $(printf '%s\n' "${OUT[@]}" | sort | paste -sd, -)"
 [ "${#SKIP[@]}" = 0 ] || derivation="${derivation}; not $(printf '%s\n' "${SKIP[@]}" | sort | paste -sd, -)"
 [ "${SCOPED_PIN}" = 1 ] && derivation="${derivation}; scoped" || derivation="${derivation}; unscoped"
+for k in "${!NO_READER[@]}"; do derivation="${derivation}; no reader for ${k}/ (${NO_READER[${k}]})"; done
 
 case "$1" in
 sync)

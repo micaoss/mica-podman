@@ -195,6 +195,20 @@ if [ "$RC" -eq 1 ] && says "$OUT" "refused header"; then
     pass "V17 a pin carrying another format's header is refused"
 else fail "V17 rc=$RC: $OUT"; fi
 
+# A family nothing here reads and nothing here has named is the shape a copy
+# loses a new vector by: vectors-pin/ arrived this way.
+pins alpha=alpha beta=beta
+printf '# mica-vectors-pin v1\nREPOSITORY=mica\nCOMMIT=%s\n' "$COMMIT" >"$TMP/vectors.pin"
+mkdir -p "$CAN/telemetry/valid"
+printf 'x\n' >"$CAN/telemetry/valid/thing"
+printf 'telemetry/valid/thing\tvalid\t-\t-\n' >>"$CAN/expected.tsv"
+rm -f "$SITE/$COMMIT"
+tar -czf "$SITE/$COMMIT" -C "$TMP" "mica-$COMMIT"
+run check
+if [ "$RC" -eq 1 ] && says "$OUT" "vector family 'telemetry/'"; then
+    pass "V19 a vector family nothing here reads and nothing here has named stops the run"
+else fail "V19 rc=$RC: $OUT"; fi
+
 RC=0
 OUT=$(bash tools/vectors.sh pin "$REPO_ROOT/tools/vectors.pin" 2>&1) || RC=$?
 if [ "$RC" -eq 0 ] && [ "$OUT" = valid ]; then

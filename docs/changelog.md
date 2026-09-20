@@ -1,5 +1,36 @@
 # Changelog
 
+## 2026-09-20 14:41 [change]
+
+Two defects of the same family, found by `mica-boards` in its own tree and
+checked here rather than assumed away.
+
+**A stale implementation is worse than an absent one, because it answers
+confidently.** `tools/check-lock.sh` implemented the `board` kind as a
+four-column row; the format made it five. No lock this repository reads or
+writes carries a `board` row and no vector in its required set has one, so the
+implementation existed only to give a wrong answer: a `mica-boards` lock came
+back `column-count`, *a claim about the row's shape*, where `kind-unknown` is
+the truth -- this reader does not implement that form. Deleted; all 100
+assertions still pass, which is what a kind that was doing nothing looks like.
+`apt` was checked the same way and stays: the pinned Base lock carries one.
+
+**And a floor derived from a filename is a floor derived from somebody's
+naming.** This one was half-present here. The subset is derived from vector
+content and from `derived-from.tsv`, so `release-slash` was never in it on the
+strength of its name -- it is an edit of a board lock, and this reader now
+answers `kind-unknown` for it. But the *mode* was read from the first path
+component, and an unrecognised one was silently dropped: rename `lock/` in
+`mica` and this repository's floor would quietly lose forty vectors while the
+gate stayed green. A family nothing here reads must now be **named with its
+reason** (`repos/`: the source cache is `tools/repos.sh`'s and this repository
+has neither) and anything else stops the run. The reason printed on every run,
+because a gap that is not reported becomes an omission.
+
+`vectors-pin/` is the case that proves it: it arrived as a new family this
+afternoon, and under the old shape it would have been dropped for being
+unrecognised rather than looked at.
+
 ## 2026-09-20 14:30 [note]
 
 `/etc/nftables.conf` is dropped from the composed root while `/usr/sbin/nft` is

@@ -58,8 +58,15 @@ if [ "${MODE}" = pins ]; then
 fi
 [ -f "${FILE}" ] || { echo "error: ${FILE} is not a file" >&2; exit 2; }
 
-KINDS=(release image pool package board upstream apt data)
-declare -A COLUMNS=([release]=4 [image]=5 [pool]=3 [package]=5 [board]=4 [upstream]=7 [apt]=5 [data]=4)
+# The kinds this reader implements, in the sort order of 1.4. `board` is not
+# among them: no lock read or written here carries one, and the implementation
+# this file used to have was a four-column row the format has since made five.
+# A stale implementation is worse than an absent one because it answers
+# confidently -- it made a mica-boards lock `column-count`, a claim about the
+# row's shape, where `kind-unknown` is the honest answer: this reader does not
+# implement that form (mica-boards, 2026-09-20).
+KINDS=(release image pool package upstream apt data)
+declare -A COLUMNS=([release]=4 [image]=5 [pool]=3 [package]=5 [upstream]=7 [apt]=5 [data]=4)
 kind_index() { local i; for i in "${!KINDS[@]}"; do [ "${KINDS[$i]}" != "$1" ] || { echo "$i"; return; }; done; }
 
 # 1.1: UTF-8, LF with a final LF, no CR, header, no empty line, leading space or trailing tab.
@@ -214,11 +221,6 @@ for row in "${ROWS[@]:1}"; do
         [[ "${FIELDS[1]}" =~ ${NAME_RE} ]] && [[ "${FIELDS[2]}" =~ ${ARCH_RE} ]] && [[ "${FIELDS[3]}" =~ ${VERSION_RE} ]] && [[ "${FIELDS[4]}" =~ ${SHA_RE} ]] || refuse field-value
         key="${FIELDS[1]}"$'\x01'"${FIELDS[2]}"
         PACKAGE_ARCHES+=("${FIELDS[2]}")
-        ;;
-    board)
-        [[ "${FIELDS[1]}" =~ ${NAME_RE} ]] && [[ "${FIELDS[2]}" =~ ${ARCH_RE} ]] || refuse field-value
-        reference "${FIELDS[3]}"
-        key="${FIELDS[1]}"
         ;;
     upstream)
         roots="${FIELDS[6]}"
