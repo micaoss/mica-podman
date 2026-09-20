@@ -2,7 +2,7 @@
 
 MICA_ARCH ?= arm64
 
-.PHONY: help inputs podman podman-pins dev-pins podman-pins-test stamp-test inputs-test lock-test version-test package-inputs-test dev-pins-test package-test release-test base-check base-check-test deb pool package-gate publish offline offline-test lint check
+.PHONY: help inputs vectors vectors-sync podman podman-pins dev-pins podman-pins-test stamp-test inputs-test lock-test vectors-test version-test package-inputs-test dev-pins-test package-test release-test base-check base-check-test deb pool package-gate publish offline offline-test lint check
 
 help:
 	@echo "  inputs              verify every lock in locks/ against its pinned release (network)"
@@ -13,12 +13,20 @@ help:
 	@echo "  package-gate        the package gate over _out/debs, with no-cache engine and archive rebuilds"
 	@echo "  publish             publish _out/debs as the pools and assets of the published release TAG=<YYYYMMDD-HHMM> (release workflow only)"
 	@echo "  base-check          every Debian package mica-podman needs comes from the pinned mica-system-base release (network)"
+	@echo "  vectors             tests/vectors against mica at the commit tests/vectors.pin names (network)"
+	@echo "  vectors-sync        rewrite tests/vectors from that commit (network)"
 	@echo "  podman-pins         are the upstream tags in locks/upstream.lock current? (network)"
 	@echo "  dev-pins            re-resolve the Debian build closure of the engine stages (network, docker)"
-	@echo "  check               lint, podman-pins-test, stamp-test, inputs-test, lock-test, version-test, package-inputs-test, dev-pins-test, package-test, release-test, base-check-test, offline-test"
+	@echo "  check               lint, podman-pins-test, stamp-test, inputs-test, lock-test, vectors-test, version-test, package-inputs-test, dev-pins-test, package-test, release-test, base-check-test, offline-test"
 
 inputs:
 	bash tools/inputs.sh verify
+
+vectors:
+	bash tools/vectors.sh check
+
+vectors-sync:
+	bash tools/vectors.sh sync
 
 podman:
 	bash build.sh
@@ -57,6 +65,9 @@ inputs-test:
 lock-test:
 	bash tests/lock-test.sh
 
+vectors-test:
+	bash tests/vectors-test.sh
+
 version-test:
 	bash tests/version-test.sh
 
@@ -84,4 +95,4 @@ base-check-test:
 lint:
 	bash tests/shell-lint.sh
 
-check: lint podman-pins-test stamp-test inputs-test lock-test version-test package-inputs-test dev-pins-test package-test release-test base-check-test offline-test
+check: lint podman-pins-test stamp-test inputs-test lock-test vectors-test version-test package-inputs-test dev-pins-test package-test release-test base-check-test offline-test

@@ -1,9 +1,9 @@
 # mica-vectors v1: path, result (valid|refused), rule, mode (ci|local|offline|-)
 lock/valid/mica-build-env.lock	valid	-	-
 lock/valid/mica-core.lock	valid	-	-
-lock/valid/mica-boards.lock	valid	-	-
 lock/valid/mica-system-base.lock	valid	-	-
 lock/valid/offline-mica-core.lock	valid	-	-
+lock/valid/mica-system-base-data.lock	valid	-	-
 lock/refused/header.lock	refused	header	-
 lock/refused/empty-line.lock	refused	encoding	-
 lock/refused/trailing-tab.lock	refused	encoding	-
@@ -26,6 +26,11 @@ lock/refused/upstream-image-without-digest.lock	refused	reference-digest	-
 lock/refused/upstream-outside-base.lock	refused	base-only-kind	-
 lock/refused/package-without-pool.lock	refused	package-without-pool	-
 lock/refused/unsorted.lock	refused	sort-order	-
+lock/refused/data-file.lock	refused	data-file	-
+lock/refused/data-columns.lock	refused	column-count	-
+lock/refused/data-name.lock	refused	field-value	-
+lock/refused/data-duplicate.lock	refused	duplicate-key	-
+lock/refused/data-sort-order.lock	refused	sort-order	-
 upstream/valid/upstream.lock	valid	-	-
 upstream/refused/release-row.lock	refused	upstream-release-row	-
 upstream/refused/other-kind.lock	refused	kind-unknown	-

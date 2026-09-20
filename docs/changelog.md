@@ -1,5 +1,44 @@
 # Changelog
 
+## 2026-09-20 14:00 [change]
+
+The lock vectors are no longer copied. `tools/vectors.sh` reads
+`mica:docs/design/release-lock/vectors/` at the commit `tests/vectors.pin`
+names and refuses any difference, in both directions and byte for byte
+(`make vectors`, in `ci.yml` beside `make base-check`); `make vectors-sync`
+is the only way `tests/vectors` changes. This is 9.1 of the spec and the
+mechanism `mica-build:tools/deploy-pool.sh --check` already uses on
+`mica-core`'s contract fixtures.
+
+**The required subset is derived, not declared.** Nothing in
+`tools/vectors.sh` names a vector family. What this repository can encounter
+follows from `locks/pins/`: the kinds a pinned producer's own *valid* vector
+carries are the kinds owed, no pin carries `SCOPE=` so no scoped vector is
+owed, and a mode `tools/check-lock.sh` does not have (`repos/`) is owed by
+nobody here. Pin a scoped producer and the scoped vectors become required on
+the next run with no edit. `tests/vectors-test.sh` tests that derivation
+against a synthetic `mica` over `file://` -- a fixture copy of the real
+vectors would be the copy this tool exists to remove.
+
+Two things it found on its first run, which is the argument for it:
+
+- **48 rows was a subset and a stale copy at once, and the size said which
+  it was not.** The copy came from `4df34ee`; `lock/valid/mica-boards.lock`
+  had since been renamed, eight `upstream/` vectors had changed, and every
+  one of those passed, because a checker that ships its own fixtures agrees
+  with itself. 53 rows now, of 84.
+- The `data` family was reachable and absent. `tools/check-lock.sh` gains
+  the `data` kind (1.2.4: `data <name> <file> <sha256>`, key `<name>`, sorted
+  last, `data-file` for two rows naming one file), because `mica-system-base`
+  is pinned here and its next release carries those rows. Implemented before
+  the re-pin, not before the release, which is the sequencing the spec asks
+  for: nothing breaks until something re-pins, and then it breaks loudly.
+
+The derivation is why the `data` rows arrived on time: it reads what the
+producer's vector says a lock of theirs may carry, not what the lock pinned
+here happens to use today. Deriving from the pinned bytes would have hidden
+the kind until the lock that needs it was already here and refused.
+
 ## 2026-09-20 13:00 [note]
 
 The graphroot mount options are a default, not a boundary (user ruling). The

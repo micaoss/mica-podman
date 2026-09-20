@@ -26,6 +26,8 @@ jobs:
           ref: ${{ inputs.ref }}
       - name: Offline checks
         run: make check
+      - name: The lock vectors against mica at the pinned commit
+        run: make vectors
       - name: Debian dependencies against the pinned mica-system-base release
         run: make base-check
   package:

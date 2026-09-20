@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # tools/check-lock.sh over the specification's vectors: tests/vectors/ is
-# mica:docs/design/release-lock/vectors/ (lock, upstream and pins, and their rows
-# of expected.tsv; the repos vectors belong to tools/repos.sh, which this
-# repository does not have yet). The path's first directory names the mode; a
-# pins vector runs under CI when its mode is `ci`. Offline.
+# mica:docs/design/release-lock/vectors/ at the commit tests/vectors.pin names,
+# less the forms this repository cannot encounter. tools/vectors.sh owns both
+# halves of that sentence and `make vectors` refuses a difference; this test
+# only runs the checker over what is there. The path's first directory names
+# the mode; a pins vector runs under CI when its mode is `ci`. Offline.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 V=tests/vectors

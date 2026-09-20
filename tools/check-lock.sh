@@ -54,8 +54,8 @@ if [ "${MODE}" = pins ]; then
 fi
 [ -f "${FILE}" ] || { echo "error: ${FILE} is not a file" >&2; exit 2; }
 
-KINDS=(release image pool package board upstream apt)
-declare -A COLUMNS=([release]=4 [image]=5 [pool]=3 [package]=5 [board]=4 [upstream]=7 [apt]=5)
+KINDS=(release image pool package board upstream apt data)
+declare -A COLUMNS=([release]=4 [image]=5 [pool]=3 [package]=5 [board]=4 [upstream]=7 [apt]=5 [data]=4)
 kind_index() { local i; for i in "${!KINDS[@]}"; do [ "${KINDS[$i]}" != "$1" ] || { echo "$i"; return; }; done; }
 
 # 1.1: UTF-8, LF with a final LF, no CR, header, no empty line, leading space or trailing tab.
@@ -171,7 +171,7 @@ reference() {
     [ "${BASH_REMATCH[2]}" = "${2:-${REPOSITORY}}" ] || refuse reference-repository
 }
 
-declare -A KEYS=() POOLS=()
+declare -A KEYS=() POOLS=() DATA_FILES=()
 SORTKEYS=() PACKAGE_ARCHES=() BASE_ONLY=0
 for row in "${ROWS[@]:1}"; do
     split "${row}"
@@ -220,6 +220,15 @@ for row in "${ROWS[@]:1}"; do
         [[ "${FIELDS[1]}" == https://* ]] && [ -n "${FIELDS[2]}" ] && [ -n "${FIELDS[3]}" ] && [[ "${FIELDS[4]}" == /* ]] || refuse field-value
         key=""
         BASE_ONLY=1
+        ;;
+    # 1.2.4: a release asset a producer computed about its own output, keyed
+    # by the producer's own name for it. Any repository may publish one, so it
+    # is not base-only; nothing here may read one as a build input.
+    data)
+        [[ "${FIELDS[1]}" =~ ${NAME_RE} ]] && [[ "${FIELDS[2]}" =~ ${NAME_RE} ]] && [[ "${FIELDS[3]}" =~ ${SHA_RE} ]] || refuse field-value
+        [ -z "${DATA_FILES[${FIELDS[2]}]-}" ] || refuse data-file
+        DATA_FILES["${FIELDS[2]}"]=1
+        key="${FIELDS[1]}"
         ;;
     *) refuse release-row ;;
     esac
