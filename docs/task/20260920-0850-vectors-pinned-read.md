@@ -47,6 +47,18 @@ Reading the vectors at a pinned commit
   `pool` row, and with an invalid reference in it the lock could be refused
   for the wrong reason: a refused vector that could be refused by two rules
   tests neither. The sync replaced it with `mica`'s bytes.
+- **Why this repository keeps a copy, restated so it does not become a habit
+  nobody can justify**: `make check` is the offline gate and `lock-test` is
+  inside it, so the vectors must be readable with no network. `mica-boards`
+  showed the other shape also runs offline -- no copy, the vectors fetched at
+  the pinned commit into a git-ignored source cache whose directory name is
+  the commit -- and it is the better one, because a copy in a tree can drift
+  silently and a cache cannot. It is not available here: this repository has
+  no source cache and no `tools/repos.sh`, which is the same absence that puts
+  the `repos/` vector family outside the required subset. **If `tools/repos.sh`
+  lands here for the offline build, revisit this: deleting the copy becomes
+  the cheaper option rather than the more expensive one.** The reason is
+  contingent on a missing tool, not on a preference.
 - The bun rename artefact (`bun-linux-uefi-x64.zip`, an asset that does not
   exist) was reported and is fixed in `mica` at `ddf4edc`. `735ebaa` was
   pinned here for six hours before the move to `b2e3044`; the pin's own
