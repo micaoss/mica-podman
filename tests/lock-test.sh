@@ -53,10 +53,22 @@ while IFS=$'\t' read -r refused relation sibling; do
     case "${refused}" in '#'* | '') continue ;; esac
     siblings=$((siblings + 1))
     [ -n "${RESULT_OF[${refused}]-}" ] || fail "derived-from.tsv names ${refused}, which expected.tsv does not list"
-    if [ "${RESULT_OF[${sibling}]-}" = valid ]; then
-        pass "${refused}: ${relation} ${sibling}, which is here and valid"
-    else
+    if [ "${RESULT_OF[${sibling}]-}" != valid ]; then
         fail "${refused} is written against ${sibling}, which is not a valid vector of this copy"
+    elif [ "${relation}" = reorder-of ]; then
+        # The multiset argument (mica-system-base, 2026-09-20): a vector holding
+        # exactly its sibling's rows in another order can break no rule but
+        # order. It is the one check here with an aperture on the canonical
+        # rather than on this copy of it -- comparing replicas cannot see a
+        # defect they share, and comparing rows to rows can. Five fixtures
+        # carried an incidental difference until it was run.
+        if diff <(sort "${V}/${refused}") <(sort "${V}/${sibling}") >/dev/null; then
+            pass "${refused}: ${relation} ${sibling}, and its rows are exactly that vector's"
+        else
+            fail "${refused} is ${relation} ${sibling} and its rows are not that vector's, so order is not the only rule it can break: $(diff <(sort "${V}/${refused}") <(sort "${V}/${sibling}") | tr '\n' ' ')"
+        fi
+    else
+        pass "${refused}: ${relation} ${sibling}, which is here and valid"
     fi
 done <"${V}/derived-from.tsv"
 [ "${siblings}" -gt 0 ] || fail "derived-from.tsv names no sibling; every refused lock vector declares one"

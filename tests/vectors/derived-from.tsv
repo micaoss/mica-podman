@@ -1,5 +1,8 @@
 # mica-vectors-derivation v1: refused vector, relation, the valid vector it is written against.
 #   edit-of     a small edit of that vector: at most two changed lines, and not identical.
+#   reorder-of  exactly that vector's rows in another order, so ORDER IS THE ONLY RULE IT CAN
+#               BREAK -- an argument about what cannot differ, not about what a re-parse returns
+#               (mica-system-base, 2026-09-20).
 #   minimal-of  an independently written minimal lock of the same shape, so no line bound
 #               applies -- the sibling names the shape rather than the source text.
 # Written because the intent existed only in whoever wrote the fixture, and because pairing
@@ -9,7 +12,7 @@ lock/refused/empty-line.lock	edit-of	lock/valid/mica-core.lock
 lock/refused/trailing-tab.lock	edit-of	lock/valid/mica-core.lock
 lock/refused/unknown-kind.lock	edit-of	lock/valid/mica-core.lock
 lock/refused/column-count.lock	minimal-of	lock/valid/mica-core.lock
-lock/refused/release-not-first.lock	edit-of	lock/valid/mica-core.lock
+lock/refused/release-not-first.lock	reorder-of	lock/valid/mica-core.lock
 lock/refused/release-missing.lock	edit-of	lock/valid/mica-core.lock
 lock/refused/release-value.lock	edit-of	lock/valid/mica-core.lock
 lock/refused/scoped-release-not-allowed.lock	edit-of	lock/valid/mica-core.lock
@@ -27,9 +30,17 @@ lock/refused/upstream-image-republished.lock	edit-of	lock/valid/mica-build-env.l
 lock/refused/upstream-image-without-digest.lock	edit-of	lock/valid/mica-build-env.lock
 lock/refused/upstream-outside-base.lock	edit-of	lock/valid/mica-core.lock
 lock/refused/package-without-pool.lock	minimal-of	lock/valid/mica-core.lock
-lock/refused/unsorted.lock	minimal-of	lock/valid/mica-core.lock
+lock/refused/unsorted.lock	reorder-of	lock/valid/mica-core.lock
 lock/refused/data-file.lock	edit-of	lock/valid/mica-system-base-data.lock
 lock/refused/data-columns.lock	edit-of	lock/valid/mica-system-base.lock
 lock/refused/data-name.lock	edit-of	lock/valid/mica-system-base.lock
 lock/refused/data-duplicate.lock	edit-of	lock/valid/mica-system-base-data.lock
 lock/refused/data-sort-order.lock	edit-of	lock/valid/mica-system-base.lock
+upstream/refused/release-row.lock	edit-of	upstream/valid/upstream.lock
+upstream/refused/other-kind.lock	edit-of	upstream/valid/upstream.lock
+upstream/refused/repository-source.lock	edit-of	upstream/valid/upstream.lock
+upstream/refused/image-republished.lock	edit-of	upstream/valid/upstream.lock
+upstream/refused/image-without-digest.lock	edit-of	upstream/valid/upstream.lock
+upstream/refused/source-without-sha256.lock	edit-of	upstream/valid/upstream.lock
+upstream/refused/git-short-commit.lock	edit-of	upstream/valid/upstream.lock
+upstream/refused/unsorted.lock	reorder-of	upstream/valid/upstream.lock

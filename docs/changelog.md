@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-09-20 14:28 [change]
+
+The pin and the copy move together, and they moved: `74055c7`, which carries
+`ddf4edc`'s bun repair and the nine fixtures `mica` has repaired since
+(`c4efe00`, `653f641`). `make vectors` is what made the lag visible, and the
+move is a two-file commit rather than a one-line one -- moving the pin without
+the copy would have made this repository's own gate refuse, correctly.
+
+`tests/lock-test.sh` now runs the **multiset argument** over every `reorder-of`
+sibling (`mica-system-base`, 2026-09-20): a refused vector holding exactly its
+sibling's rows in another order can break no rule but order. Three of them
+here, all holding. It is worth having because it is the one check in this
+repository with an aperture on the canonical rather than on this copy of it --
+**a comparison between replicas has an aperture of zero on a defect they
+share**, which is how five fixtures carried an incidental missing comment line
+through every byte comparison run that afternoon.
+
 ## 2026-09-20 14:16 [change]
 
 Three corrections to the round above, all of them from other repositories'
