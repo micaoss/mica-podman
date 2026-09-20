@@ -12,6 +12,8 @@ lock/refused/column-count.lock	refused	column-count	-
 lock/refused/release-not-first.lock	refused	release-row	-
 lock/refused/release-missing.lock	refused	release-row	-
 lock/refused/release-value.lock	refused	field-value	-
+lock/refused/scoped-release-not-allowed.lock	refused	release-scope	-
+lock/refused/build-only-kind.lock	refused	build-only-kind	-
 lock/refused/image-platform.lock	refused	field-value	-
 lock/refused/image-source.lock	refused	image-source	-
 lock/refused/image-source-reference.lock	refused	reference-repository	-
@@ -40,6 +42,13 @@ upstream/refused/image-without-digest.lock	refused	reference-digest	-
 upstream/refused/source-without-sha256.lock	refused	column-count	-
 upstream/refused/git-short-commit.lock	refused	field-value	-
 upstream/refused/unsorted.lock	refused	sort-order	-
+vectors-pin/valid/vectors.pin	valid	-	-
+vectors-pin/valid/commented.pin	valid	-	-
+vectors-pin/refused/header.pin	refused	header	-
+vectors-pin/refused/key-order.pin	refused	pin-format	-
+vectors-pin/refused/extra-key.pin	refused	pin-format	-
+vectors-pin/refused/short-commit.pin	refused	field-value	-
+vectors-pin/refused/no-final-lf.pin	refused	encoding	-
 pins/valid/release	valid	-	ci
 pins/valid/offline-checkout	valid	-	local
 pins/refused/checkout-in-ci	refused	checkout-in-ci	ci
@@ -52,3 +61,4 @@ pins/refused/key-order	refused	pin-format	local
 pins/refused/checkout-without-offline	refused	pin-format	local
 pins/refused/checkout-relative	refused	field-value	local
 pins/refused/lock-invalid	refused	lock-invalid	local
+pins/refused/scope-not-allowed	refused	release-scope	local

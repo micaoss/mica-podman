@@ -1,5 +1,66 @@
 # Changelog
 
+## 2026-09-20 14:16 [change]
+
+Three corrections to the round above, all of them from other repositories'
+results, and the pin moved twice.
+
+**The derivation was missing its negative half** (coordinator `uj991oa2`,
+after `mica-core`). What a reader can encounter is not only what it consumes:
+`scoped-release-not-allowed`, `build-only-kind` and
+`pins/refused/scope-not-allowed` are the vectors saying what *this*
+repository's own forms may not be, and a subset derived only from what is read
+drops exactly the vectors that keep a reader from silently accepting something
+it should refuse. This repository had the behaviour and not the vectors: it
+refused a scoped release row with `field-value` and a `SCOPE=` pin with
+`pin-format`, which is a refusal for the wrong reason. `tools/check-lock.sh`
+now implements `release-scope` (a `<scope>.<release>` row, and a `SCOPE=` pin:
+no scoped producer is pinned here and this repository publishes no scope) and
+`build-only-kind` (`input`, `origin`, `built`, `index`, `product`, `bundle`,
+`asset` in a lock that is not `mica-build`'s -- kinds of the format, so
+carrying one is not `kind-unknown`).
+
+**Which refused vector is owed is now declared, not inferred.** `mica`'s
+`derived-from.tsv` (9.3) names the valid vector each refused one is written
+against, and that is the whole rule: a refusal is owed exactly when the form
+it was written against is owed. `scoped-release-not-allowed` is an edit of a
+package producer's lock and `release-slash` an edit of a board lock, and only
+the first is a shape this repository has. The inference this replaced got both
+right and would not have stayed right.
+
+**`make vectors` also reads what this repository writes**: the row kinds are
+read out of `tools/release.sh` rather than declared, so a writer that starts
+emitting a kind the reader has never conformed to changes the required set. A
+producer that conforms only to what it consumes can emit a row nobody
+downstream accepts.
+
+The pin is `tools/vectors.pin` now, `mica-vectors-pin v1` (9.2): the basename
+is uniform across repositories so that finding each reader's copy is one
+command, and the directory is each repository's own. The seven canonical
+`vectors-pin/` vectors run here too -- this tool is that family's reader --
+and the pin carries a comment saying why it is at this commit.
+
+It moved to `b2e3044`, the first commit after the bun URL repair. `735ebaa`
+was pinned for six hours with the rename artefact in it; nothing downloads a
+fixture, so it was inert, and the pin says so rather than replacing it
+quietly.
+
+**Provenance, re-measured by blobs after a row comparison was shown to lie.**
+The old copy was `4df34ee` -- 84 of its 86 blobs identical, 0 files it had and
+`mica` did not -- with two differences: `expected.tsv`, which is the subset
+manifest, and `upstream/refused/other-kind.lock`, whose last row read
+`pool.amd64.x` instead of `pool.amd64.20260914-2042`. That is a hand edit,
+the same one `mica-core` found in its own copy, so both copies inherited it
+from a common ancestor rather than diverging. It matters because that vector
+exists to prove an `upstream` lock is refused for carrying a `pool` row, and
+with an invalid reference in it the lock could be refused for the wrong
+reason: **a refused vector that could be refused by two rules tests neither.**
+The sync replaced it with `mica`'s bytes. And `lock/valid/mica-boards.lock`
+was not a vector nobody has -- it existed at `4df34ee` and was renamed later,
+which the row comparison could not tell apart from an invention.
+
+63 vectors of 92 now.
+
 ## 2026-09-20 14:00 [change]
 
 The lock vectors are no longer copied. `tools/vectors.sh` reads

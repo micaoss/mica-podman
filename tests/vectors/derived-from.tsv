@@ -1,0 +1,35 @@
+# mica-vectors-derivation v1: refused vector, relation, the valid vector it is written against.
+#   edit-of     a small edit of that vector: at most two changed lines, and not identical.
+#   minimal-of  an independently written minimal lock of the same shape, so no line bound
+#               applies -- the sibling names the shape rather than the source text.
+# Written because the intent existed only in whoever wrote the fixture, and because pairing
+# by smallest diff picks the wrong sibling (measured 2026-09-20).
+lock/refused/header.lock	edit-of	lock/valid/mica-core.lock
+lock/refused/empty-line.lock	edit-of	lock/valid/mica-core.lock
+lock/refused/trailing-tab.lock	edit-of	lock/valid/mica-core.lock
+lock/refused/unknown-kind.lock	edit-of	lock/valid/mica-core.lock
+lock/refused/column-count.lock	minimal-of	lock/valid/mica-core.lock
+lock/refused/release-not-first.lock	edit-of	lock/valid/mica-core.lock
+lock/refused/release-missing.lock	edit-of	lock/valid/mica-core.lock
+lock/refused/release-value.lock	edit-of	lock/valid/mica-core.lock
+lock/refused/scoped-release-not-allowed.lock	edit-of	lock/valid/mica-core.lock
+lock/refused/build-only-kind.lock	edit-of	lock/valid/mica-core.lock
+lock/refused/image-platform.lock	minimal-of	lock/valid/mica-build-env.lock
+lock/refused/image-source.lock	edit-of	lock/valid/mica-build-env.lock
+lock/refused/image-source-reference.lock	edit-of	lock/valid/mica-build-env.lock
+lock/refused/duplicate-key.lock	edit-of	lock/valid/mica-core.lock
+lock/refused/reference-without-digest.lock	edit-of	lock/valid/mica-core.lock
+lock/refused/repository-mismatch.lock	edit-of	lock/valid/mica-core.lock
+lock/refused/local-reference-in-release.lock	edit-of	lock/valid/mica-core.lock
+lock/refused/registry-reference-offline.lock	edit-of	lock/valid/offline-mica-core.lock
+lock/refused/image-registry.lock	edit-of	lock/valid/mica-build-env.lock
+lock/refused/upstream-image-republished.lock	edit-of	lock/valid/mica-build-env.lock
+lock/refused/upstream-image-without-digest.lock	edit-of	lock/valid/mica-build-env.lock
+lock/refused/upstream-outside-base.lock	edit-of	lock/valid/mica-core.lock
+lock/refused/package-without-pool.lock	minimal-of	lock/valid/mica-core.lock
+lock/refused/unsorted.lock	minimal-of	lock/valid/mica-core.lock
+lock/refused/data-file.lock	edit-of	lock/valid/mica-system-base-data.lock
+lock/refused/data-columns.lock	edit-of	lock/valid/mica-system-base.lock
+lock/refused/data-name.lock	edit-of	lock/valid/mica-system-base.lock
+lock/refused/data-duplicate.lock	edit-of	lock/valid/mica-system-base-data.lock
+lock/refused/data-sort-order.lock	edit-of	lock/valid/mica-system-base.lock

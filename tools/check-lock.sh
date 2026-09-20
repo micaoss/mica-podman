@@ -31,6 +31,10 @@ if [ "${MODE}" = pins ]; then
         mapfile -t P <"${pin}"
         [ "${P[0]}" = "# mica-pin v1" ] || refuse header
         keys="$(printf '%s\n' "${P[@]:1}" | sed 's/=.*//' | paste -sd' ' -)"
+        # A scoped pin is a well-formed mica-pin v1 record of a scoped producer
+        # (mica-boards, mica-build). This repository pins neither, so a SCOPE=
+        # here is a scope where none may be, not a malformed pin.
+        case "${keys}" in "REPOSITORY SCOPE "*) refuse release-scope ;; esac
         [ "${keys}" = "REPOSITORY RELEASE SHA256SUMS" ] || [ "${keys}" = "REPOSITORY RELEASE SHA256SUMS CHECKOUT" ] || refuse pin-format
         repository="${P[1]#REPOSITORY=}" release="${P[2]#RELEASE=}" sums="${P[3]#SHA256SUMS=}" checkout="${P[4]:-}"; checkout="${checkout#CHECKOUT=}"
         { [ "${release}" = offline ] && [ "${#P[@]}" = 5 ]; } || { [ "${release}" != offline ] && [ "${#P[@]}" = 4 ]; } || refuse pin-format
@@ -143,8 +147,14 @@ if [ "${MODE}" = upstream ]; then
     exit 0
 fi
 
+# The kinds only a mica-build lock may carry (1.2.2, 1.2.3). They are kinds of
+# the format, so a lock carrying one is refused for carrying it where it may
+# not be, not for naming something unknown. No mica-build lock is read here, so
+# the repository does not have to be checked before refusing.
+BUILD_ONLY=(input origin built index product bundle asset)
 for row in ${ROWS[@]+"${ROWS[@]}"}; do
     split "${row}"
+    for k in "${BUILD_ONLY[@]}"; do [ "${k}" != "${FIELDS[0]}" ] || refuse build-only-kind; done
     [ -n "${COLUMNS[${FIELDS[0]}]-}" ] || refuse kind-unknown
     [ "${#FIELDS[@]}" = "${COLUMNS[${FIELDS[0]}]}" ] || refuse column-count
 done
@@ -155,6 +165,10 @@ for row in ${ROWS[@]+"${ROWS[@]}"}; do [ "${row%%$'\t'*}" != release ] || releas
 
 split "${ROWS[0]}"
 REPOSITORY="${FIELDS[1]}" RELEASE="${FIELDS[2]}"
+# 1.0: a scoped release is <scope>.<release>, and only mica-boards and
+# mica-build have one. Neither is pinned here and neither is this repository,
+# so any scoped release row is a scope where none may be.
+[[ ! "${RELEASE}" =~ ^[a-z0-9][a-z0-9.+-]*\.[0-9]{8}-[0-9]{4}$ ]] || refuse release-scope
 [[ "${REPOSITORY}" =~ ^[a-z0-9][a-z0-9-]*$ ]] && { [[ "${RELEASE}" =~ ^[0-9]{8}-[0-9]{4}$ ]] || [ "${RELEASE}" = offline ]; } &&
     [[ "${FIELDS[3]}" =~ ^[0-9a-f]{40}$ ]] || refuse field-value
 REGISTRY=ghcr.io/micaoss

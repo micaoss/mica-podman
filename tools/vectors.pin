@@ -1,0 +1,7 @@
+# mica-vectors-pin v1
+# b2e3044 is the first commit after ddf4edc, which repaired the bun download
+# URL the 2026-09-16 board rename had written into ten vector files. The
+# pre-fix commit 735ebaa was pinned here for six hours; nothing downloads a
+# fixture, so it was inert, and it is named rather than quietly replaced.
+REPOSITORY=mica
+COMMIT=b2e3044ebfdef6df7e8e939e451c14eff3fc2e72

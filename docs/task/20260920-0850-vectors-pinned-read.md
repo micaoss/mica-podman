@@ -26,14 +26,28 @@ Reading the vectors at a pinned commit
 
 ## Notes
 
-- Landed: `tools/vectors.sh check|sync`, `tests/vectors.pin` (mica
-  `735ebaa24d3a42fc339a9a0e2a6d4b76ab1d287a`), `tests/vectors-test.sh` (13),
-  the `data` kind in `tools/check-lock.sh`, `make vectors` in `ci.yml`.
-- The copy was 48 rows from `4df34ee` and is 53 of 84 now; the difference was
-  not only the `data` family (a renamed vector and eight changed `upstream/`
-  ones), which is the staleness a row count cannot show.
-- Reported to the coordinator: `upstream/valid/upstream.lock` and seven of its
-  neighbours at the pinned commit carry the bun asset URL
-  `bun-linux-uefi-x64.zip`, which reads as collateral of the x64 -> uefi-x64
-  board rename; upstream publishes `bun-linux-x64.zip`. Ours now matches mica,
-  because the vectors are mica's; the fix belongs there.
+- Landed: `tools/vectors.sh check|sync|pin`, `tools/vectors.pin` (mica
+  `b2e3044ebfdef6df7e8e939e451c14eff3fc2e72`), `tests/vectors-test.sh` (18),
+  the `data`, `release-scope` and `build-only-kind` rules in
+  `tools/check-lock.sh`, `make vectors` in `ci.yml`. 63 vectors of 92.
+- The derivation is three clauses, not one (coordinator `uj991oa2`,
+  2026-09-20): what this repository pins, what it produces (the row kinds read
+  out of `tools/release.sh`), and what its own forms may not be -- the last
+  taken from `mica`'s `derived-from.tsv`, which declares the valid vector each
+  refused one is written against. It is a floor, not a ceiling.
+- The copy was 48 rows from `4df34ee`; the staleness was not only the `data`
+  family (a renamed vector and eight changed `upstream/` ones), which is what
+  a row count cannot show.
+- Provenance re-measured by blob rather than by row, after a row comparison
+  was shown to lie: `4df34ee`, 84 of 86 blobs identical, nothing here that
+  `mica` did not have, and one hand edit --
+  `upstream/refused/other-kind.lock` carrying `pool.amd64.x` instead of
+  `pool.amd64.20260914-2042`, the same edit `mica-core` found in its own copy.
+  That vector exists to prove an `upstream` lock is refused for carrying a
+  `pool` row, and with an invalid reference in it the lock could be refused
+  for the wrong reason: a refused vector that could be refused by two rules
+  tests neither. The sync replaced it with `mica`'s bytes.
+- The bun rename artefact (`bun-linux-uefi-x64.zip`, an asset that does not
+  exist) was reported and is fixed in `mica` at `ddf4edc`. `735ebaa` was
+  pinned here for six hours before the move to `b2e3044`; the pin's own
+  comment records why it is at that commit.

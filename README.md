@@ -59,7 +59,7 @@ not supported until a test runs a container as `mica` in a composed image.
 | `tools/release.sh` | the pools on ghcr.io and `mica-podman.lock` on the GitHub Release: identity checks, never replaced, anonymous read-back |
 | `tools/inputs.sh`, `tools/check-lock.sh` | `locks/`: the file rules, release verification, image references |
 | `tools/dev-pins.sh`, `pins/` | the Debian build closure of the engine stages, pinned by sha256 |
-| `tools/vectors.sh`, `tests/vectors.pin` | the lock vectors, read out of `mica` at a pinned commit; the required subset derived from `locks/pins/` |
+| `tools/vectors.sh`, `tools/vectors.pin` | the lock vectors, read out of `mica` at a pinned commit; the required subset derived from what this repository pins, produces and must refuse |
 
 ## CI and releases
 
