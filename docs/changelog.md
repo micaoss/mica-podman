@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-09-20 09:30 [decision]
+
+Rootless is not supported, recorded with its evidence (asked by the coordinator
+after mica-build found `/etc/subuid` and `/etc/subgid` missing from a composed
+product root). The package configures the system engine only: systemd cgroup
+manager, root-owned graphroot, system Quadlet, `libsubid5` and no `uidmap`. A
+container run by the operator account fails in the user-namespace setup; it does
+not run as root.
+
+Measured in the published Base root this repository pins (mica-system-base
+`20260915-1102`, amd64 rootfs by digest): `/etc/subuid` and `/etc/subgid` are
+present and both read `mica:100000:65536`, so the composer drops them, they were
+never missing at the source. What is missing everywhere is `newuidmap` and
+`newgidmap` -- `uidmap` is not installed in the Base root -- and `/home/mica`,
+so the ranges cannot be used even where the files survive. Supporting rootless
+would need those, plus lingering and the kernel's unprivileged user-namespace
+default, and is not supported until a test runs a container as `mica` in a
+composed image.
+
 ## 2026-09-16 09:00 [progress]
 
 No stage of the build reads a live Debian archive any more (the second half of

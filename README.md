@@ -29,6 +29,17 @@ The package also carries `/etc/containers` (storage and network state under
 `/mica/containers`) and `etc-containers-systemd.mount`, which mica-core
 enables from the `container.enabled` setting.
 
+Rootless is not a supported mode (2026-09-20). The package configures the
+system engine only: the systemd cgroup manager, a root-owned graphroot under
+`/mica/containers`, the system Quadlet directory, and `libsubid5` without
+`uidmap`. A container started by the operator account fails loudly in the
+user-namespace setup rather than running as root, and `docker run` fails the
+same way, since `/usr/bin/docker` is a symlink to podman. Supporting it would
+need `uidmap` with its file capabilities intact in the composed image, a
+writable home or an explicit rootless storage path, lingering for the user
+manager, and unprivileged user namespaces enabled by the board kernel; it is
+not supported until a test runs a container as `mica` in a composed image.
+
 | Path | Role |
 |---|---|
 | `build.sh`, `Dockerfile` | the engine binaries |
