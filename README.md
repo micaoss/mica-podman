@@ -71,9 +71,16 @@ manager, and unprivileged user namespaces enabled by the board kernel; it is
 not supported until a test runs a container as `mica` in a composed image.
 
 The subordinate ranges have no rootful use here either, which is the question
-to ask before calling them vestigial. The one rootful consumer of `/etc/subuid`
-in podman is `--userns=auto`, and it does not read the range of the invoking
-user: not rootless and with no `root-auto-userns-user` set, the store looks up
+to ask before calling them vestigial -- and they are not an allocation anybody
+made. `/etc/subuid` and `/etc/subgid` in the Base root read
+`mica:100000:65536`, which is exactly what `/etc/login.defs` in that same root
+declares as the default for the first user created: `SUB_UID_MIN 100000`,
+`SUB_UID_COUNT 65536` (measured in `mica-system-base` `20260915-1102`, amd64
+rootfs by digest). `useradd` wrote it; nobody chose it. A specific-looking
+value is the best-disguised default there is.
+
+The one rootful consumer of `/etc/subuid` in podman is `--userns=auto`, and it
+does not read the range of the invoking user: not rootless and with no `root-auto-userns-user` set, the store looks up
 `RootAutoUserNsUser`, the constant `"containers"`
 (`vendor/go.podman.io/storage/store.go:3924`, reached from
 `getAdditionalSubIDs` at `vendor/go.podman.io/storage/userns.go:44-47`, the

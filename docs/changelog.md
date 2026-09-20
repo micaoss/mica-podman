@@ -1,10 +1,30 @@
 # Changelog
 
+## 2026-09-20 20:00 [note]
+
+A correction to the note below, and it is mine: I called `mica:100000:65536`
+an **allocation** three times, which says somebody chose it. Nobody did.
+Measured in the same root by digest (`mica-system-base` `20260915-1102`,
+amd64): `/etc/login.defs` declares `SUB_UID_MIN 100000` and `SUB_UID_COUNT
+65536`, and `/etc/subuid` reads `mica:100000:65536` -- the shipped default for
+the first user created, written by `useradd`, matching digit for digit.
+(`mica-system-base` found the mechanism; this is the same fact read here
+rather than relayed, since `login.defs` is in a root this repository already
+pins and reads.)
+
+Nothing measured changes. What changes is what a reader concludes from it: an
+allocation invites the question *why that range*, and a default does not. **A
+default with a considered-looking value is the best-disguised default there
+is** -- `100000:65536` looks like a decision because it is round, specific and
+sized, and roundness is what a default is made of. The rootless finding stands
+on the absence of `newuidmap`, `newgidmap` and `uidmap`, none of which is a
+default anybody could read an intent into.
+
 ## 2026-09-20 19:51 [note]
 
 One route left open by the rootless record of `502fcdf`, closed in the pinned
-source: **the `mica:100000:65536` allocation in the Base root has no rootful
-use here either.**
+source: **the `mica:100000:65536` range in the Base root has no rootful use
+here either.**
 
 The only rootful consumer of `/etc/subuid` in podman is `--userns=auto`, and it
 does not read the invoking user's range. In podman `v5.8.6` (`a859fc6`),
