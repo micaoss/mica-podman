@@ -108,22 +108,44 @@ engine returns `Containers.PidsLimit` -- `DefaultPidsLimit = 2048`
 comes from the engine rather than from the unit. Read in podman `v5.8.6` at
 `a859fc6`, the commit `locks/upstream.lock` pins.
 
-**Memory and CPU are unbounded, and on the kernel measured they cannot be
-bounded.** `/sys/fs/cgroup/cgroup.controllers` on a booted `uefi-x64` guest
-reads `cpuset cpu io hugetlb pids rdma misc`, and both `memory.max` and
-`cpu.max` are *absent*: `CONFIG_MEMCG` and `CONFIG_CFS_BANDWIDTH` are what
-create those files, not what enable the controller. `podman run --memory 64m`
-and `--cpus 0.5` fail at the write with ``crun: open `memory.max` for
-writing: No such file or directory``. So a memory field added to the unit
-type upstream would not bound memory until the kernel floor changes -- the
-limit would fail loudly at container start rather than take effect.
+**Memory and CPU are not bounded by anybody, and whether they *can* be depends
+on the board release the product was built from.** A measurement of this needs
+its subject named, because the answer changed on 2026-09-20.
 
-**Not measured here**: `pids.max` read from inside a running container on a
-device. `pids` is in that guest's controller list, so the limit has a file to
-land in, and containers do start -- but the end state has not been read, and
-this repository has no device. That is one `cat` for whoever starts the first
-rendered unit, and it is the difference between *the engine asks for 2048* and
-*the container got 2048*.
+On a guest built before that day's board re-pin,
+`/sys/fs/cgroup/cgroup.controllers` reads `cpuset cpu io hugetlb pids rdma
+misc` and both `memory.max` and `cpu.max` are *absent* -- `CONFIG_MEMCG` and
+`CONFIG_CFS_BANDWIDTH` create those files, and the controller list does not.
+`podman run --memory 64m` and `--cpus 0.5` fail at the write with ``crun: open
+`memory.max` for writing: No such file or directory``.
+
+That kernel has been superseded. Read in `mica-boards` at the two tags
+(`boards/uefi-x64/kernel/config/uefi-x64.config`):
+
+| | `uefi-x64.20260916-0744` | `uefi-x64.20260920-1536` |
+|---|---|---|
+| `CONFIG_CGROUP_PIDS` | `y` | `y` |
+| `CONFIG_MEMCG` | absent | `y` |
+| `CONFIG_CFS_BANDWIDTH` | absent | `y` |
+
+`mica-build` pins `uefi-x64.20260920-1536`, so **a product built from the
+current pin should carry both knob files and a memory or cpu limit should
+apply rather than fail.** Not measured on a booted guest of such a build --
+by this repository, which has none, or by anyone who has reported one here.
+Until it is, the shipped kernel configuration is the evidence and a boot is
+not.
+
+The pids ceiling above is unaffected either way: `CONFIG_CGROUP_PIDS=y` at
+both releases, so the 2048 the engine asks for has a file to land in on both.
+
+**Two things not measured here**, both one command on a device and neither
+answerable from this tree:
+
+- `pids.max` read from inside a running container. *The engine asks for 2048*
+  and *the container got 2048* are different statements and only the first is
+  verified, in source.
+- `memory.max` present on a guest built from the current board pin, and a
+  `--memory` limit taking effect on it.
 
 | Path | Role |
 |---|---|

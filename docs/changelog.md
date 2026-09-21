@@ -1,5 +1,47 @@
 # Changelog
 
+## 2026-09-21 07:38 [note]
+
+**Which guest, from which pin.** The coordinator asked it of the controller
+list this repository has been quoting since 2026-09-20, and the answer is that
+the measurement's subject has been superseded -- so the conclusion drawn from
+it inverts for anything built since.
+
+The record of it (2026-09-20 12:00) says *measured on a booted uefi-x64 guest
+(mica-build)* and names **no product, no board release, no pin and no time of
+boot**. A controller list is a measurement and a measurement has a subject;
+that one was carried forward for a day without one, into a README paragraph
+written in the present tense about the current system.
+
+Read at the tags in `mica-boards`, `boards/uefi-x64/kernel/config/uefi-x64.config`:
+`uefi-x64.20260916-0744` carries `CONFIG_CGROUP_PIDS=y` and neither
+`CONFIG_MEMCG` nor `CONFIG_CFS_BANDWIDTH`; `uefi-x64.20260920-1536` carries all
+three. `mica-build`'s `locks/pins/mica-boards.uefi-x64.pin` reads
+`RELEASE=20260920-1536`. The boot behind the 12:00 entry predates that release,
+which was published at 15:34Z that day.
+
+**So "memory and cpu cannot be bounded" was true of the kernel measured and is
+not true of the current pin**, and the sentence this repository sent to another
+repository yesterday -- *adding a memory field to `ContainerUnit` would not
+bound memory; the field is not the missing piece, the kernel floor is* -- was
+correct reasoning resting on a superseded fact. **On the current pin the floor
+is there and the field is the missing piece.** Corrected in the README, and
+corrected to the coordinator rather than left to be discovered, because it was
+advice against a change that would now work.
+
+The pids ceiling is untouched: `CONFIG_CGROUP_PIDS=y` at both releases, so the
+2048 the engine asks for has a file to land in either way.
+
+**The general form, which is the part worth keeping:** *cannot* is a claim
+about a system and `cannot` measured once is a claim about a system at a
+version. This repository has the rule written down for object lifetimes and
+applied it to neither: a kernel capability is exactly the kind of thing that
+arrives in a release while a record of its absence sits in a file nobody
+re-reads. A measurement quoted without its subject cannot be re-checked by
+anyone, including its author -- **the subject is what makes a measurement
+falsifiable, and a measurement that cannot be falsified is an opinion with
+numbers in it.**
+
 ## 2026-09-21 07:28 [note]
 
 `micad` is about to render `50-mica-<name>.container` units for this package's
