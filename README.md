@@ -88,9 +88,42 @@ value carried from `storage.conf` through
 `vendor/go.podman.io/storage/types/options.go:483`). `storage.conf` here does
 not set it, and the Base root's `/etc/subuid` names `mica` and not
 `containers`, so `--userns=auto` would fail to find mappings rather than use
-the allocation. Setting `root-auto-userns-user` in this package's
-`storage.conf` is what it would take to give that range a rootful purpose;
-nothing asks for one today.
+the range. Setting `root-auto-userns-user` in this package's `storage.conf` is
+what it would take to give it a rootful purpose; nothing asks for one today.
+
+### What bounds a container here
+
+A unit with no resource fields is not an unbounded container, and the two are
+easy to conflate now that `micad` renders `.container` units for this
+package's generator to read.
+
+**Processes are bounded and nothing in the unit says so.** podman sets a pids
+limit on *every* container it creates: `InitResourceLimits`
+(`pkg/specgen/resources_linux.go:8`) fills in `ResourceLimits.Pids` whenever
+the caller left it unset and cgroups are not disabled, from `rtc.PidsLimit()`
+(`vendor/go.podman.io/common/pkg/config/default.go:650`), which for a rootful
+engine returns `Containers.PidsLimit` -- `DefaultPidsLimit = 2048`
+(`default.go:183`, assigned at `:265`). `containers.conf` here does not set
+`pids_limit`, so **2048 is the limit on every container on the device**, and it
+comes from the engine rather than from the unit. Read in podman `v5.8.6` at
+`a859fc6`, the commit `locks/upstream.lock` pins.
+
+**Memory and CPU are unbounded, and on the kernel measured they cannot be
+bounded.** `/sys/fs/cgroup/cgroup.controllers` on a booted `uefi-x64` guest
+reads `cpuset cpu io hugetlb pids rdma misc`, and both `memory.max` and
+`cpu.max` are *absent*: `CONFIG_MEMCG` and `CONFIG_CFS_BANDWIDTH` are what
+create those files, not what enable the controller. `podman run --memory 64m`
+and `--cpus 0.5` fail at the write with ``crun: open `memory.max` for
+writing: No such file or directory``. So a memory field added to the unit
+type upstream would not bound memory until the kernel floor changes -- the
+limit would fail loudly at container start rather than take effect.
+
+**Not measured here**: `pids.max` read from inside a running container on a
+device. `pids` is in that guest's controller list, so the limit has a file to
+land in, and containers do start -- but the end state has not been read, and
+this repository has no device. That is one `cat` for whoever starts the first
+rendered unit, and it is the difference between *the engine asks for 2048* and
+*the container got 2048*.
 
 | Path | Role |
 |---|---|

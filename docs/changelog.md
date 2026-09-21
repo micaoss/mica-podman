@@ -1,5 +1,43 @@
 # Changelog
 
+## 2026-09-21 07:28 [note]
+
+`micad` is about to render `50-mica-<name>.container` units for this package's
+quadlet generator, which has shipped since the beginning and has never had a
+unit to generate from on a device (coordinator `uj991oa2`, routed from
+mica-core). Three claims about this tree came with it and all three hold:
+`deb/Dockerfile` installs `quadlet` and symlinks it to
+`/usr/lib/systemd/system-generators/podman-system-generator` (`:40-44`); there
+is no `.service` and no `.socket` anywhere in the tree, so there is no API
+socket and the engine is daemonless; `storage.conf` sets
+`graphroot = "/mica/containers/storage"`.
+
+One precision on the second: **no `.service` and no `.socket` is not no unit.**
+This package ships exactly one, `overlay/etc/systemd/system/etc-containers-systemd.mount`,
+and it is part of the path the new units travel: quadlet reads only `/run`,
+`/etc` and `/usr/share/containers/systemd`, `/etc` is read-only here, so that
+mount binds `/mnt/data/state/quadlet` onto `/etc/containers/systemd`. The
+units micad writes land on DATA and reach the generator through a unit this
+repository ships. Daemonless is right; unitless is not.
+
+**And the fourth claim needs correcting, in the direction that matters.** *The
+units your generator will see carry no resource limits at all* is true of the
+unit files and false of the containers. podman sets a pids limit on every
+container it creates -- `InitResourceLimits`
+(`pkg/specgen/resources_linux.go:8`) from `rtc.PidsLimit()`
+(`vendor/go.podman.io/common/pkg/config/default.go:650`), default
+`DefaultPidsLimit = 2048` (`:183`, assigned `:265`), and `containers.conf`
+here does not override it. So a fork bomb in a rendered unit meets 2048,
+supplied by the engine and invisible in the unit.
+
+Memory and CPU are genuinely unbounded, and the sharper half is that on the
+`uefi-x64` kernel measured they **cannot** be bounded: `memory.max` and
+`cpu.max` do not exist, so a limit fails at the write. Adding a memory field
+to the unit type would not bound memory until the kernel floor changes. Both
+recorded in the README beside the pids finding, because the first question
+anyone asks of a new container lifecycle is what bounds it, and the honest
+answer has three different shapes for three resources.
+
 ## 2026-09-20 20:00 [note]
 
 A correction to the note below, and it is mine: I called `mica:100000:65536`
