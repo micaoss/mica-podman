@@ -119,21 +119,25 @@ misc` and both `memory.max` and `cpu.max` are *absent* -- `CONFIG_MEMCG` and
 `podman run --memory 64m` and `--cpus 0.5` fail at the write with ``crun: open
 `memory.max` for writing: No such file or directory``.
 
-That kernel has been superseded. Read in `mica-boards` at the two tags
-(`boards/uefi-x64/kernel/config/uefi-x64.config`):
+That kernel has been superseded. Read in `mica-boards` at the tags, in each
+board's `kernel/config/*.config`:
 
-| | `uefi-x64.20260916-0744` | `uefi-x64.20260920-1536` |
+| | `uefi-x64.20260916-0744` | all four boards at `*.20260920-1536` |
 |---|---|---|
 | `CONFIG_CGROUP_PIDS` | `y` | `y` |
 | `CONFIG_MEMCG` | absent | `y` |
 | `CONFIG_CFS_BANDWIDTH` | absent | `y` |
 
-`mica-build` pins `uefi-x64.20260920-1536`, so **a product built from the
-current pin should carry both knob files and a memory or cpu limit should
-apply rather than fail.** Not measured on a booted guest of such a build --
-by this repository, which has none, or by anyone who has reported one here.
-Until it is, the shipped kernel configuration is the evidence and a boot is
-not.
+`mica-build` pins `uefi-x64`, `uefi-arm64`, `cx3576` and `s905x5m` all at
+`20260920-1536`, so **a product built from any current pin should carry both
+knob files and a memory or cpu limit should apply rather than fail.**
+
+Three kinds of evidence sit behind that sentence and they are not
+interchangeable, which is the whole reason this paragraph was wrong for a day:
+the **declared config** at the tag is what this repository read; the **shipped
+kernel artefact** is what `mica-boards` verified; a **file in
+`/sys/fs/cgroup`** on a booted guest is what would settle it, and nobody has
+reported one from a product on the current pin.
 
 The pids ceiling above is unaffected either way: `CONFIG_CGROUP_PIDS=y` at
 both releases, so the 2048 the engine asks for has a file to land in on both.

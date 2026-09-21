@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-09-21 07:48 [note]
+
+Scope closed on the entry below, which read `uefi-x64` only. All four boards
+at `*.20260920-1536` carry `CONFIG_MEMCG=y`, `CONFIG_CFS_BANDWIDTH=y` and
+`CONFIG_CGROUP_PIDS=y` (each board's own `kernel/config/*.config`, read at its
+tag), and `mica-build` pins all four at `20260920-1536`. So the qualification
+the coordinator added -- *neither of us has re-read the other three today* --
+is discharged rather than carried.
+
+And the README now names **which kind of evidence** the claim rests on, because
+this round happened by treating one kind as another: the declared config at a
+tag is what this repository read, the shipped kernel artefact is what
+`mica-boards` verified, and a file in `/sys/fs/cgroup` on a booted guest is
+what would settle it. A config symbol and a knob file are two claims, and the
+measurement that was superseded was of the third kind while its replacement is
+of the first.
+
 ## 2026-09-21 07:38 [note]
 
 **Which guest, from which pin.** The coordinator asked it of the controller
