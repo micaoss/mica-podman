@@ -119,25 +119,43 @@ misc` and both `memory.max` and `cpu.max` are *absent* -- `CONFIG_MEMCG` and
 `podman run --memory 64m` and `--cpus 0.5` fail at the write with ``crun: open
 `memory.max` for writing: No such file or directory``.
 
-That kernel has been superseded. Read in `mica-boards` at the tags, in each
-board's `kernel/config/*.config`:
+That kernel has been superseded. Read out of the **published kernel
+components** at `*.20260920-1536`, by digest
+(`ghcr.io/micaoss/mica-boards:kernel.<board>.<release>`, `artifactType
+application/vnd.mica.board.kernel`), not out of the committed config -- on the
+FIT boards that file is a vendor input and says nothing about the kernel that
+ships:
 
-| | `uefi-x64.20260916-0744` | all four boards at `*.20260920-1536` |
-|---|---|---|
-| `CONFIG_CGROUP_PIDS` | `y` | `y` |
-| `CONFIG_MEMCG` | absent | `y` |
-| `CONFIG_CFS_BANDWIDTH` | absent | `y` |
+| board | component layer | `MEMCG` | `CFS_BANDWIDTH` | `CGROUP_PIDS` |
+|---|---|---|---|---|
+| `uefi-x64` | `kernel/config` | `y` | `y` | `y` |
+| `uefi-arm64` | `kernel/config` | `y` | `y` | `y` |
+| `cx3576` | `kernel/dev/config` | `y` | `y` | `y` |
+| `cx3576` | `kernel/prod/config` | `y` | `y` | `y` |
+| `s905x5m` | `kernel/dev/config` | `y` | `y` | `y` |
+| `s905x5m` | `kernel/prod/config` | `y` | `y` | `y` |
 
-`mica-build` pins `uefi-x64`, `uefi-arm64`, `cx3576` and `s905x5m` all at
-`20260920-1536`, so **a product built from any current pin should carry both
-knob files and a memory or cpu limit should apply rather than fail.**
+Against `uefi-x64.20260916-0744`, which had `CGROUP_PIDS` and neither of the
+other two. **Six readings and not four, because the profile is an axis of its
+own on the FIT boards**: `cx3576` and `s905x5m` publish `kernel/dev/config`
+and `kernel/prod/config` at *different digests* (their `Image` differs too,
+while `kernel.release` and `modules.tar` are identical -- two builds of one
+source differing in configuration), so one profile is not evidence about the
+other. The UEFI boards publish a single `kernel/config` and the axis does not
+exist there.
+
+`mica-build` pins all four boards at `20260920-1536`, so **a product built
+from any current pin should carry both knob files and a memory or cpu limit
+should apply rather than fail.**
 
 Three kinds of evidence sit behind that sentence and they are not
 interchangeable, which is the whole reason this paragraph was wrong for a day:
-the **declared config** at the tag is what this repository read; the **shipped
-kernel artefact** is what `mica-boards` verified; a **file in
-`/sys/fs/cgroup`** on a booted guest is what would settle it, and nobody has
-reported one from a product on the current pin.
+a **config symbol** is what is read above; a **file in `/sys/fs/cgroup`** on a
+booted guest is what would settle it, and nobody has reported one from a
+product on the current pin. And the first kind has a subject that differs by
+board -- the committed file is the recorded output on the UEFI boards and a
+vendor input on the FIT ones, which is why the reading above is of the
+component rather than of the tree.
 
 The pids ceiling above is unaffected either way: `CONFIG_CGROUP_PIDS=y` at
 both releases, so the 2048 the engine asks for has a file to land in on both.

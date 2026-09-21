@@ -1,5 +1,50 @@
 # Changelog
 
+## 2026-09-21 07:59 [note]
+
+Two of the four readings in the entry below did not support what they were
+quoted for, and the correction is one level deeper than the one before it.
+
+**On the FIT boards (`cx3576`, `s905x5m`) the committed `kernel/config` is a
+vendor input, not the recorded output.** Reading it at the tag answers a
+different question and looks exactly like the right answer: the file is there,
+it parses, it carries the symbol. Nothing in the reading could have said
+otherwise. On the UEFI boards the committed file *is* the recorded output, so
+the same command was sound for two boards and unsound for two.
+
+Re-derived here rather than relayed, from the published components by digest
+(`ghcr.io/micaoss/mica-boards:kernel.<board>.20260920-1536`, `artifactType
+application/vnd.mica.board.kernel`) -- six readings, all three symbols `y` in
+every one:
+
+    uefi-x64     kernel/config        38d095fb...
+    uefi-arm64   kernel/config        b2f4613e...
+    cx3576       kernel/dev/config    8725ed87...      kernel/prod/config  4d904f62...
+    s905x5m      kernel/dev/config    b4502db1...      kernel/prod/config  666e27b0...
+
+**Six and not four, because the profile is an axis of its own on the FIT
+boards**, which nobody had named: `dev` and `prod` are separate builds with
+different `config` and `Image` digests (their `kernel.release` and
+`modules.tar` are identical, so it is one source built twice, not two
+versions). One profile is not evidence about the other. The UEFI boards
+publish a single `kernel/config` and the axis does not exist there.
+
+**And this lands on the three-kinds distinction written two entries ago**,
+which is the part worth carrying. That distinction named the *kinds* --
+declared config, shipped artefact, file in `/sys/fs/cgroup` -- and treated
+"declared config at a tag" as one thing. It is not: the same path means the
+recorded output on one board and a vendor input on another. **Getting the kind
+right is not enough when the kind's subject varies by member.** Which is the
+same defect as the one this round started with, one level in: a measurement
+quoted without its subject, where this time the subject was not the guest but
+the file.
+
+The rule was already written down from another round -- *re-derive a relayed
+number from the shipped component, not the vendor input* -- and this
+repository read the vendor input anyway, on the two boards where the
+distinction exists. Having a rule and applying it to the right member are
+different acts.
+
 ## 2026-09-21 07:48 [note]
 
 Scope closed on the entry below, which read `uefi-x64` only. All four boards
