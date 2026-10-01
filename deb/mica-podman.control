@@ -1,0 +1,19 @@
+Package: mica-podman
+Version: 6.1.3-1
+Source-Date-Epoch: 1790803560
+Architecture: @ARCH@
+Maintainer: Mica OS <hi@micaos.dev>
+Section: admin
+Priority: optional
+Depends: mica-system, nftables, libc6 (>= 2.39), libcap2 (>= 1:2.10), libgcc-s1 (>= 4.2), libglib2.0-0t64 (>= 2.76.0), libjson-c5 (>= 0.15), libseccomp2 (>= 2.6.0), libsubid5 (>= 1:4.16.0), libsystemd0 (>= 246)
+Description: Mica OS container engine
+ podman 6.1.3, crun 1.30.1, conmon 2.2.1, netavark and aardvark-dns 2.1.0 and
+ catatonit 0.2.1, built from pinned upstream source, with mica-containerd, the
+ supervisor that runs the declared containers through its API on systemd and
+ OpenRC alike, and the /etc/containers configuration. /usr/bin/docker is an
+ alias of podman; there is no Docker daemon or socket.
+ .
+ Nothing is enabled: mica-core enables mica-containerd from the
+ container.enabled setting. netavark execs nft, and podman dlopens libsystemd
+ for journald where systemd runs, so both are declared explicitly. mica-system
+ provides the /mica/containers and state mounts the configuration uses.

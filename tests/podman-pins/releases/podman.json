@@ -1,0 +1,602 @@
+[
+ {
+  "tag_name": "v5.8.6",
+  "published_at": "2026-08-13T21:11:05Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v6.1.0",
+  "published_at": "2026-08-12T20:12:23Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v6.1.0-rc1",
+  "published_at": "2026-07-31T18:07:18Z",
+  "prerelease": true,
+  "draft": false
+ },
+ {
+  "tag_name": "v6.0.2",
+  "published_at": "2026-07-22T03:02:34Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v6.0.1",
+  "published_at": "2026-07-08T20:15:01Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.8.5",
+  "published_at": "2026-07-08T18:46:08Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.8.4",
+  "published_at": "2026-06-26T15:37:17Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v6.0.0",
+  "published_at": "2026-06-24T17:38:25Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v6.0.0-rc1",
+  "published_at": "2026-06-12T19:48:42Z",
+  "prerelease": true,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.8.3",
+  "published_at": "2026-06-12T17:58:07Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.8.2",
+  "published_at": "2026-04-14T17:56:41Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.8.1",
+  "published_at": "2026-03-11T20:03:43Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.8.0",
+  "published_at": "2026-02-12T18:58:43Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.8.0-rc1",
+  "published_at": "2026-02-10T20:34:44Z",
+  "prerelease": true,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.7.1",
+  "published_at": "2025-12-10T16:38:28Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.7.0",
+  "published_at": "2025-11-11T19:04:01Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.7.0-rc3",
+  "published_at": "2025-11-05T16:45:42Z",
+  "prerelease": true,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.7.0-rc2",
+  "published_at": "2025-10-30T14:34:24Z",
+  "prerelease": true,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.6.2",
+  "published_at": "2025-09-30T19:42:49Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.6.1",
+  "published_at": "2025-09-04T20:55:43Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.6.0",
+  "published_at": "2025-08-15T15:50:25Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.6.0-rc2",
+  "published_at": "2025-08-08T17:27:31Z",
+  "prerelease": true,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.6.0-rc1",
+  "published_at": "2025-07-25T19:01:03Z",
+  "prerelease": true,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.5.2",
+  "published_at": "2025-06-24T17:21:28Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.5.1",
+  "published_at": "2025-06-05T21:55:26Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.5.0",
+  "published_at": "2025-05-14T15:50:56Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.5.0-rc2",
+  "published_at": "2025-05-01T12:39:06Z",
+  "prerelease": true,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.5.0-rc1",
+  "published_at": "2025-04-24T17:00:08Z",
+  "prerelease": true,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.4.2",
+  "published_at": "2025-04-02T16:27:32Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.4.1",
+  "published_at": "2025-03-11T18:36:06Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.4.0",
+  "published_at": "2025-02-11T18:00:58Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.4.0-rc3",
+  "published_at": "2025-02-05T19:01:38Z",
+  "prerelease": true,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.4.0-rc2",
+  "published_at": "2025-01-30T13:34:53Z",
+  "prerelease": true,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.4.0-rc1",
+  "published_at": "2025-01-23T16:28:21Z",
+  "prerelease": true,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.3.2",
+  "published_at": "2025-01-22T13:37:05Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.3.1",
+  "published_at": "2024-11-21T15:39:48Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.3.0",
+  "published_at": "2024-11-13T13:14:16Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.3.0-rc3",
+  "published_at": "2024-11-06T19:15:33Z",
+  "prerelease": true,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.3.0-rc2",
+  "published_at": "2024-10-31T13:52:35Z",
+  "prerelease": true,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.3.0-rc1",
+  "published_at": "2024-10-22T15:57:17Z",
+  "prerelease": true,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.2.5",
+  "published_at": "2024-10-23T17:48:57Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.2.4",
+  "published_at": "2024-10-07T16:04:08Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.2.3",
+  "published_at": "2024-09-24T15:17:24Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.2.2",
+  "published_at": "2024-08-21T19:58:22Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.2.1",
+  "published_at": "2024-08-14T18:07:13Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.2.0",
+  "published_at": "2024-08-02T12:04:56Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.2.0-rc3",
+  "published_at": "2024-08-01T11:59:26Z",
+  "prerelease": true,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.2.0-rc2",
+  "published_at": "2024-07-23T12:01:55Z",
+  "prerelease": true,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.2.0-rc1",
+  "published_at": "2024-07-16T13:43:25Z",
+  "prerelease": true,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.1.2",
+  "published_at": "2024-07-10T14:55:49Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.1.1",
+  "published_at": "2024-06-04T21:12:41Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v4.9.5",
+  "published_at": "2024-05-30T15:08:45Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.1.0",
+  "published_at": "2024-05-29T20:24:57Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.1.0-rc1",
+  "published_at": "2024-05-15T21:33:20Z",
+  "prerelease": true,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.0.3",
+  "published_at": "2024-05-10T17:57:35Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.0.2",
+  "published_at": "2024-04-17T19:12:37Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.0.1",
+  "published_at": "2024-04-01T14:04:39Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v4.9.4",
+  "published_at": "2024-03-25T21:22:08Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.0.0",
+  "published_at": "2024-03-19T17:23:48Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.0.0-rc7",
+  "published_at": "2024-03-15T13:22:43Z",
+  "prerelease": true,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.0.0-rc6",
+  "published_at": "2024-03-11T19:02:46Z",
+  "prerelease": true,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.0.0-rc5",
+  "published_at": "2024-03-08T02:47:28Z",
+  "prerelease": true,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.0.0-rc4",
+  "published_at": "2024-03-05T10:40:39Z",
+  "prerelease": true,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.0.0-rc3",
+  "published_at": "2024-02-22T21:04:54Z",
+  "prerelease": true,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.0.0-rc2",
+  "published_at": "2024-02-16T16:44:58Z",
+  "prerelease": true,
+  "draft": false
+ },
+ {
+  "tag_name": "v4.9.3",
+  "published_at": "2024-02-13T22:38:32Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v5.0.0-rc1",
+  "published_at": "2024-02-08T16:36:40Z",
+  "prerelease": true,
+  "draft": false
+ },
+ {
+  "tag_name": "v4.9.2",
+  "published_at": "2024-02-02T23:30:43Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v4.9.1",
+  "published_at": "2024-02-01T14:10:59Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v4.9.0",
+  "published_at": "2024-01-23T01:13:03Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v4.8.3",
+  "published_at": "2024-01-03T13:54:39Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v4.8.2",
+  "published_at": "2023-12-11T12:42:38Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v4.8.1",
+  "published_at": "2023-12-05T11:48:23Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v4.8.0",
+  "published_at": "2023-11-27T19:49:05Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v4.8.0-rc1",
+  "published_at": "2023-11-20T18:41:00Z",
+  "prerelease": true,
+  "draft": false
+ },
+ {
+  "tag_name": "v4.7.2",
+  "published_at": "2023-10-31T14:07:39Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v4.7.1",
+  "published_at": "2023-10-05T17:18:15Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v4.7.0",
+  "published_at": "2023-09-27T18:01:24Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v4.7.0-rc1",
+  "published_at": "2023-09-15T22:50:18Z",
+  "prerelease": true,
+  "draft": false
+ },
+ {
+  "tag_name": "v4.6.2",
+  "published_at": "2023-08-28T19:14:25Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v4.6.1",
+  "published_at": "2023-08-10T20:55:03Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v4.6.0",
+  "published_at": "2023-07-20T22:06:07Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v4.6.0-rc2",
+  "published_at": "2023-07-13T19:47:25Z",
+  "prerelease": true,
+  "draft": false
+ },
+ {
+  "tag_name": "v4.6.0-rc1",
+  "published_at": "2023-07-03T13:03:39Z",
+  "prerelease": true,
+  "draft": false
+ },
+ {
+  "tag_name": "v4.5.1",
+  "published_at": "2023-05-26T17:10:51Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v4.5.0",
+  "published_at": "2023-04-14T15:23:29Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v4.5.0-rc2",
+  "published_at": "2023-04-11T19:57:52Z",
+  "prerelease": true,
+  "draft": false
+ },
+ {
+  "tag_name": "v4.5.0-rc1",
+  "published_at": "2023-04-03T19:52:24Z",
+  "prerelease": true,
+  "draft": false
+ },
+ {
+  "tag_name": "v4.4.4",
+  "published_at": "2023-03-27T23:32:04Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v4.4.3",
+  "published_at": "2023-03-23T18:45:02Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v4.4.2",
+  "published_at": "2023-02-23T21:29:32Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v4.4.1",
+  "published_at": "2023-02-08T20:55:59Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v4.4.0",
+  "published_at": "2023-02-01T22:48:29Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v4.4.0-rc3",
+  "published_at": "2023-01-25T20:40:27Z",
+  "prerelease": true,
+  "draft": false
+ },
+ {
+  "tag_name": "v4.4.0-rc2",
+  "published_at": "2023-01-17T20:34:45Z",
+  "prerelease": true,
+  "draft": false
+ },
+ {
+  "tag_name": "v4.4.0-rc1",
+  "published_at": "2023-01-12T21:24:13Z",
+  "prerelease": true,
+  "draft": false
+ },
+ {
+  "tag_name": "v4.3.1",
+  "published_at": "2022-11-10T14:28:45Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v4.3.0",
+  "published_at": "2022-10-19T13:04:41Z",
+  "prerelease": false,
+  "draft": false
+ },
+ {
+  "tag_name": "v4.3.0-rc1",
+  "published_at": "2022-09-26T20:32:24Z",
+  "prerelease": true,
+  "draft": false
+ },
+ {
+  "tag_name": "v4.2.1",
+  "published_at": "2022-09-07T13:07:24Z",
+  "prerelease": false,
+  "draft": false
+ }
+]

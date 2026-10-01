@@ -1,0 +1,21 @@
+# mica-containerd on a systemd root. Not enabled by the package: mica-core enables it
+# from the container.enabled setting.
+[Unit]
+Description=Mica OS container supervisor
+Documentation=https://github.com/micaoss/mica-podman
+RequiresMountsFor=/var/lib/mica /mica/containers
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/mica-containerd
+Restart=on-failure
+RestartSec=2
+# Stopping the supervisor is not stopping its containers: podman's systemd cgroup
+# manager puts conmon and each container in scopes of their own, and only the
+# daemon itself is signalled.
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target

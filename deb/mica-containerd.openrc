@@ -1,0 +1,28 @@
+#!/sbin/openrc-run
+# mica-containerd on an OpenRC root, under supervise-daemon. In no runlevel: mica-core
+# adds it from the container.enabled setting. Stopping it leaves its containers
+# running -- conmon daemonizes, and nothing here cleans the service's cgroup -- so a
+# restarted daemon adopts them. When the system goes down they are stopped too: after
+# the daemon, which would restart them, and before mica-mounts unbinds DATA. Under
+# systemd the shutdown stops each container's scope; here nothing else would. Their
+# declared state is untouched, so they start again at the next boot.
+
+description="Mica OS container supervisor"
+command=/usr/bin/mica-containerd
+supervisor=supervise-daemon
+respawn_delay=2
+output_logger="logger -t mica-containerd -p daemon.info"
+error_logger="logger -t mica-containerd -p daemon.err"
+
+stop_post() {
+    yesno "${RC_GOINGDOWN}" || return 0
+    ebegin "Stopping the containers"
+    podman stop --all --time 10 >/dev/null 2>&1
+    eend 0
+}
+
+depend() {
+    need mica-mounts
+    use logger
+    after mica-network
+}
