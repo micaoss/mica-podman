@@ -1,0 +1,6 @@
+*
+!mica-podman.control
+!copyright
+!payload.manifest
+!mica-containerd.service
+!mica-containerd.openrc

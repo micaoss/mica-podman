@@ -1,0 +1,10 @@
+# mica-lock v1
+# FIXTURE, not a pin: git rows at the newest release of every recorded upstream, so
+# tests/podman-pins-test.sh has a current lock that does not move with the real one.
+# The commit column is a placeholder; check-pins.sh never reads it.
+git	aardvark-dns	https://github.com/containers/aardvark-dns.git	v2.1.0	ffffffffffffffffffffffffffffffffffffffff
+git	catatonit	https://github.com/openSUSE/catatonit.git	v0.2.1	ffffffffffffffffffffffffffffffffffffffff
+git	conmon	https://github.com/containers/conmon.git	v2.2.1	ffffffffffffffffffffffffffffffffffffffff
+git	crun	https://github.com/containers/crun.git	1.29.1	ffffffffffffffffffffffffffffffffffffffff
+git	netavark	https://github.com/containers/netavark.git	v2.1.0	ffffffffffffffffffffffffffffffffffffffff
+git	podman	https://github.com/containers/podman.git	v6.1.0	ffffffffffffffffffffffffffffffffffffffff

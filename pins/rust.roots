@@ -1,0 +1,3 @@
+# The packages the rust stage needs; tools/dev-pins.sh resolves their closure.
+protobuf-compiler
+pkgconf

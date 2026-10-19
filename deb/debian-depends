@@ -1,0 +1,12 @@
+# The Debian packages mica-podman needs at runtime: its Depends other than
+# mica-system, including those dpkg-shlibdeps derives. tools/base-check.sh
+# requires their closure to come from the pinned mica-system-base release.
+libc6
+libcap2
+libgcc-s1
+libglib2.0-0t64
+libjson-c5
+libseccomp2
+libsubid5
+libsystemd0
+nftables
