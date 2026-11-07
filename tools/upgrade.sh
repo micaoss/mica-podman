@@ -97,7 +97,7 @@ if [ -f mica-containerd/go.mod ]; then
     before="$(sum)"
     docker run --rm --label ai-agent=true --user "$(id -u):$(id -g)" -e HOME=/tmp \
         -v "${REPO_ROOT}:${REPO_ROOT}" -w "${REPO_ROOT}/mica-containerd" \
-        -e GOTOOLCHAIN=local -e GOFLAGS=-mod=mod -e GOMODCACHE=/tmp/gomod \
+        -e GOTOOLCHAIN=local -e GOFLAGS=-mod=mod -e GOPATH=/tmp/go -e GOMODCACHE=/tmp/gomod \
         "$("${TOOLS}" from --ref mica-build-env:go)" sh -euc 'go get -u ./... && go mod tidy && go mod vendor' >/dev/null ||
         die "moving the Go modules of mica-containerd failed"
     if [ "$(sum)" != "${before}" ]; then
