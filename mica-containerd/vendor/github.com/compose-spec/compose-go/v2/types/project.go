@@ -859,77 +859,114 @@ func (p *Project) MarshalJSON(options ...func(*marshallOptions)) ([]byte, error)
 	return json.MarshalIndent(m, "", "  ")
 }
 
-// WithServicesEnvironmentResolved parses env_files set for services to resolve the actual environment map for services
+// WithServicesEnvironmentResolved parses env_files set for services, and for their pre_start hooks, to resolve
+// the actual environment map for services and hooks
 // It returns a new Project instance with the changes and keep the original Project unchanged
 func (p Project) WithServicesEnvironmentResolved(discardEnvFiles bool) (*Project, error) {
 	newProject := p.deepCopy()
 	for i, service := range newProject.Services {
-		service.Environment = service.Environment.Resolve(newProject.Environment.Resolve)
-
-		environment := service.Environment.ToMapping()
-		for _, envFile := range service.EnvFiles {
-			err := loadEnvFile(envFile, environment, func(k string) (string, bool) {
-				// project.env has precedence doing interpolation
-				if resolve, ok := p.Environment.Resolve(k); ok {
-					return resolve, true
-				}
-				// then service.environment
-				if s, ok := service.Environment[k]; ok && s != nil {
-					return *s, true
-				}
-				return "", false
-			})
-			if err != nil {
+		if err := resolveEnvironment(&service.ContainerSpec, newProject.Environment, discardEnvFiles); err != nil {
+			return nil, err
+		}
+		// pre_start hooks inherit the service environment and env_files at load time, so each one carries
+		// the merged declarations and has to be resolved exactly like a service
+		for j := range service.PreStart {
+			if len(service.PreStart[j].Environment) == 0 && len(service.PreStart[j].EnvFiles) == 0 {
+				continue
+			}
+			if err := resolveEnvironment(&service.PreStart[j].ContainerSpec, newProject.Environment, discardEnvFiles); err != nil {
 				return nil, err
 			}
-		}
-
-		service.Environment = environment.ToMappingWithEquals().OverrideBy(service.Environment)
-
-		if discardEnvFiles {
-			service.EnvFiles = nil
 		}
 		newProject.Services[i] = service
 	}
 	return newProject, nil
 }
 
-// WithServicesLabelsResolved parses label_files set for services to resolve the actual label map for services
+// resolveEnvironment resolves the environment of a container specification: values without a value are looked up
+// in the project environment, then env_files are loaded and overridden by the explicit environment
+func resolveEnvironment(spec *ContainerSpec, projectEnv Mapping, discardEnvFiles bool) error {
+	spec.Environment = spec.Environment.Resolve(projectEnv.Resolve)
+
+	environment := spec.Environment.ToMapping()
+	for _, envFile := range spec.EnvFiles {
+		err := loadEnvFile(envFile, environment, func(k string) (string, bool) {
+			// project.env has precedence doing interpolation
+			if resolve, ok := projectEnv.Resolve(k); ok {
+				return resolve, true
+			}
+			// then service.environment
+			if s, ok := spec.Environment[k]; ok && s != nil {
+				return *s, true
+			}
+			return "", false
+		})
+		if err != nil {
+			return err
+		}
+	}
+
+	spec.Environment = environment.ToMappingWithEquals().OverrideBy(spec.Environment)
+
+	if discardEnvFiles {
+		spec.EnvFiles = nil
+	}
+	return nil
+}
+
+// WithServicesLabelsResolved parses label_files set for services, and for their pre_start hooks, to resolve
+// the actual label map for services and hooks
 // It returns a new Project instance with the changes and keep the original Project unchanged
 func (p Project) WithServicesLabelsResolved(discardLabelFiles bool) (*Project, error) {
 	newProject := p.deepCopy()
 	for i, service := range newProject.Services {
-		labels := MappingWithEquals{}
-		// resolve variables based on other files we already parsed
-		var resolve dotenv.LookupFn = func(s string) (string, bool) {
-			v, ok := labels[s]
-			if ok && v != nil {
-				return *v, ok
-			}
-			return "", false
+		if err := resolveLabels(&service.ContainerSpec, discardLabelFiles); err != nil {
+			return nil, err
 		}
-
-		for _, labelFile := range service.LabelFiles {
-			vars, err := loadLabelFile(labelFile, resolve)
-			if err != nil {
+		// pre_start hooks inherit the service labels and label_files at load time, so each one carries
+		// the merged declarations and has to be resolved exactly like a service
+		for j := range service.PreStart {
+			if err := resolveLabels(&service.PreStart[j].ContainerSpec, discardLabelFiles); err != nil {
 				return nil, err
 			}
-			labels.OverrideBy(vars.ToMappingWithEquals())
-		}
-
-		labels = labels.OverrideBy(service.Labels.ToMappingWithEquals())
-		if len(labels) == 0 {
-			labels = nil
-		} else {
-			service.Labels = NewLabelsFromMappingWithEquals(labels)
-		}
-
-		if discardLabelFiles {
-			service.LabelFiles = nil
 		}
 		newProject.Services[i] = service
 	}
 	return newProject, nil
+}
+
+// resolveLabels resolves the labels of a container specification: label_files are loaded and overridden by the
+// explicit labels
+func resolveLabels(spec *ContainerSpec, discardLabelFiles bool) error {
+	labels := MappingWithEquals{}
+	// resolve variables based on other files we already parsed
+	var resolve dotenv.LookupFn = func(s string) (string, bool) {
+		v, ok := labels[s]
+		if ok && v != nil {
+			return *v, ok
+		}
+		return "", false
+	}
+
+	for _, labelFile := range spec.LabelFiles {
+		vars, err := loadLabelFile(labelFile, resolve)
+		if err != nil {
+			return err
+		}
+		labels.OverrideBy(vars.ToMappingWithEquals())
+	}
+
+	labels = labels.OverrideBy(spec.Labels.ToMappingWithEquals())
+	if len(labels) == 0 {
+		labels = nil
+	} else {
+		spec.Labels = NewLabelsFromMappingWithEquals(labels)
+	}
+
+	if discardLabelFiles {
+		spec.LabelFiles = nil
+	}
+	return nil
 }
 
 func loadEnvFile(envFile EnvFile, environment Mapping, resolve dotenv.LookupFn) error {

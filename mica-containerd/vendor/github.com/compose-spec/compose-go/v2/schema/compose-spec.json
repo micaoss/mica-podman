@@ -559,6 +559,13 @@
                         "gw_priority": {
                           "type": "number",
                           "description": "Specify the gateway priority for the network connection."
+                        },
+                        "use_service_name_alias": {
+                          "type": [
+                            "boolean",
+                            "string"
+                          ],
+                          "description": "Register the service name as an alias on this network. Defaults to true."
                         }
                       },
                       "additionalProperties": false,
@@ -684,6 +691,16 @@
         "ulimits": {
           "$ref": "#/$defs/ulimits",
           "description": "Override the default ulimits for a container."
+        },
+        "umask": {
+          "type": [
+            "integer",
+            "string",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 4294967295,
+          "description": "Set the initial umask for the container process. When omitted or null, no mask is set and the runtime's own behavior applies; an explicit 0 masks no permission bits."
         },
         "use_api_socket": {
           "type": "boolean",

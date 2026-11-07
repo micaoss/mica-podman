@@ -3,9 +3,9 @@ module github.com/micaoss/mica-podman/mica-containerd
 go 1.26.0
 
 require (
-	github.com/compose-spec/compose-go/v2 v2.16.1
+	github.com/compose-spec/compose-go/v2 v2.16.2
 	github.com/sirupsen/logrus v1.10.2
-	go.yaml.in/yaml/v4 v4.0.0-rc.6
+	go.yaml.in/yaml/v4 v4.0.0
 )
 
 require (

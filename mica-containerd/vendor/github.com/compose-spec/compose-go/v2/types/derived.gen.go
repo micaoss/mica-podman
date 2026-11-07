@@ -920,6 +920,12 @@ func deriveDeepCopy_12(dst, src *ContainerSpec) {
 	} else {
 		dst.Ulimits = nil
 	}
+	if src.Umask == nil {
+		dst.Umask = nil
+	} else {
+		dst.Umask = new(uint32)
+		*dst.Umask = *src.Umask
+	}
 	dst.UseAPISocket = src.UseAPISocket
 	dst.User = src.User
 	dst.UserNSMode = src.UserNSMode
@@ -2324,6 +2330,12 @@ func deriveDeepCopy_55(dst, src *ServiceNetworkConfig) {
 	}
 	dst.MacAddress = src.MacAddress
 	dst.Priority = src.Priority
+	if src.UseServiceNameAlias == nil {
+		dst.UseServiceNameAlias = nil
+	} else {
+		dst.UseServiceNameAlias = new(bool)
+		*dst.UseServiceNameAlias = *src.UseServiceNameAlias
+	}
 	if src.Extensions != nil {
 		dst.Extensions = make(map[string]any, len(src.Extensions))
 		src.Extensions.DeepCopy(dst.Extensions)

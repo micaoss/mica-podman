@@ -112,6 +112,7 @@ type ContainerSpec struct {
 	Sysctls          Mapping                          `yaml:"sysctls,omitempty" json:"sysctls,omitempty"`
 	Tmpfs            StringList                       `yaml:"tmpfs,omitempty" json:"tmpfs,omitempty"`
 	Ulimits          map[string]*UlimitsConfig        `yaml:"ulimits,omitempty" json:"ulimits,omitempty"`
+	Umask            *uint32                          `yaml:"umask,omitempty" json:"umask,omitempty"`
 	UseAPISocket     bool                             `yaml:"use_api_socket,omitempty" json:"use_api_socket,omitempty"`
 	User             string                           `yaml:"user,omitempty" json:"user,omitempty"`
 	UserNSMode       string                           `yaml:"userns_mode,omitempty" json:"userns_mode,omitempty"`
@@ -465,17 +466,25 @@ type PlacementPreferences struct {
 
 // ServiceNetworkConfig is the network configuration for a service
 type ServiceNetworkConfig struct {
-	Aliases         []string `yaml:"aliases,omitempty" json:"aliases,omitempty"`
-	DriverOpts      Options  `yaml:"driver_opts,omitempty" json:"driver_opts,omitempty"`
-	GatewayPriority int      `yaml:"gw_priority,omitempty" json:"gw_priority,omitempty"`
-	InterfaceName   string   `yaml:"interface_name,omitempty" json:"interface_name,omitempty"`
-	Ipv4Address     string   `yaml:"ipv4_address,omitempty" json:"ipv4_address,omitempty"`
-	Ipv6Address     string   `yaml:"ipv6_address,omitempty" json:"ipv6_address,omitempty"`
-	LinkLocalIPs    []string `yaml:"link_local_ips,omitempty" json:"link_local_ips,omitempty"`
-	MacAddress      string   `yaml:"mac_address,omitempty" json:"mac_address,omitempty"`
-	Priority        int      `yaml:"priority,omitempty" json:"priority,omitempty"`
+	Aliases             []string `yaml:"aliases,omitempty" json:"aliases,omitempty"`
+	DriverOpts          Options  `yaml:"driver_opts,omitempty" json:"driver_opts,omitempty"`
+	GatewayPriority     int      `yaml:"gw_priority,omitempty" json:"gw_priority,omitempty"`
+	InterfaceName       string   `yaml:"interface_name,omitempty" json:"interface_name,omitempty"`
+	Ipv4Address         string   `yaml:"ipv4_address,omitempty" json:"ipv4_address,omitempty"`
+	Ipv6Address         string   `yaml:"ipv6_address,omitempty" json:"ipv6_address,omitempty"`
+	LinkLocalIPs        []string `yaml:"link_local_ips,omitempty" json:"link_local_ips,omitempty"`
+	MacAddress          string   `yaml:"mac_address,omitempty" json:"mac_address,omitempty"`
+	Priority            int      `yaml:"priority,omitempty" json:"priority,omitempty"`
+	UseServiceNameAlias *bool    `yaml:"use_service_name_alias,omitempty" json:"use_service_name_alias,omitempty"`
 
 	Extensions Extensions `yaml:"#extensions,inline,omitempty" json:"-"`
+}
+
+// ServiceNameAliasEnabled tells whether the service name is registered as an
+// alias on the network: true unless use_service_name_alias is explicitly false.
+// It is safe to call on a nil receiver, which the short `networks` syntax yields.
+func (n *ServiceNetworkConfig) ServiceNameAliasEnabled() bool {
+	return n == nil || n.UseServiceNameAlias == nil || *n.UseServiceNameAlias
 }
 
 // ServicePortConfig is the port configuration for a service
