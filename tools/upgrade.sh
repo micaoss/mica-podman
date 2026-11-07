@@ -101,6 +101,8 @@ if [ -f mica-containerd/go.mod ]; then
         "$("${TOOLS}" from --ref mica-build-env:go)" sh -euc 'go get -u ./... && go mod tidy && go mod vendor' >/dev/null ||
         die "moving the Go modules of mica-containerd failed"
     if [ "$(sum)" != "${before}" ]; then
+        # `mica-tools inputs` lists the index: the vendor tree's added and removed files go in it.
+        git add -A mica-containerd
         say "mica-containerd: the Go modules moved to their latest releases"
         MOVED=1
     fi

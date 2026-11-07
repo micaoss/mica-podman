@@ -89,5 +89,16 @@ if [ "$RC" -ne 0 ] && says "$OUT" "downloads with sha256" && [ ! -f "$TMP/out/$S
     pass "P8 an archive that downloads with other bytes is refused and not kept"
 else fail "P8 rc=$RC: $OUT"; fi
 
+# resolve in a fresh checkout (no _out/) gets past its work directory; the fake
+# docker then stops it.
+mkdir -p "$TMP/bin"
+printf '#!/bin/sh\necho "docker stub: $*" >&2\nexit 3\n' >"$TMP/bin/docker"
+chmod +x "$TMP/bin/docker"
+rm -rf "$FIX/_out"
+RC=0; OUT=$(PATH="$TMP/bin:$PATH" bash "$FIX/tools/dev-pins.sh" resolve 2>&1) || RC=$?
+if [ "$RC" -ne 0 ] && ! says "$OUT" "mktemp" && says "$OUT" "docker stub"; then
+    pass "P9 resolve in a checkout with no _out/ creates its work directory"
+else fail "P9 rc=$RC: $OUT"; fi
+
 echo "RESULT: $FAIL_N failed, $PASS_N passed"
 [ "$FAIL_N" -eq 0 ]
