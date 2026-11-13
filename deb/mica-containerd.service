@@ -5,7 +5,9 @@ Description=Mica OS container supervisor
 Documentation=https://github.com/micaoss/mica-podman
 # No network ordering: a device may run offline, and its containers start without
 # the network; a service that needs it restarts by its own policy until it is up.
-RequiresMountsFor=/var/lib/mica /mica/containers
+# A user's disk for the engine root /mica/containers/storage (Base's fstab
+# generator) must mount first, or the start fails instead of filling DATA.
+RequiresMountsFor=/var/lib/mica /mica/containers /mica/containers/storage
 
 [Service]
 Type=simple

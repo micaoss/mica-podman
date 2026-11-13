@@ -27,6 +27,14 @@ from the `container.enabled` setting, and mica-system provides the
 `/mica/containers` and state mounts. `deb/payload.manifest` is the exact list
 of paths.
 
+A user may mount a disk of their own at the engine root
+`/mica/containers/storage`. mica-containerd then does not start until it is
+mounted, so a missing disk fails the start instead of filling DATA: the systemd
+unit has `RequiresMountsFor=/mica/containers/storage`, and the OpenRC script
+needs `mica-fstab` and checks the path with `mica-require-mount` before it starts.
+On OpenRC, both come from mica-openrc 0.56-mica19 or later, which the package
+requires there (`mica-systemd | mica-openrc (>= 0.56-mica19)`).
+
 Every binary is built for size and carries no symbols: podman is linked with
 `-s -w`, netavark and aardvark-dns are built with opt-level `z`, fat LTO and
 one codegen unit, and crun, conmon and catatonit are stripped. Installed, the

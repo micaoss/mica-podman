@@ -5,7 +5,9 @@
 # restarted daemon adopts them. When the system goes down they are stopped too: after
 # the daemon, which would restart them, and before mica-mounts unbinds DATA. Under
 # systemd the shutdown stops each container's scope; here nothing else would. Their
-# declared state is untouched, so they start again at the next boot.
+# declared state is untouched, so they start again at the next boot. A user's disk
+# for the engine root /mica/containers/storage must be mounted before the start, or
+# the start is refused instead of filling DATA (mica-require-mount, of mica-openrc).
 
 description="Mica OS container supervisor"
 command=/usr/bin/mica-containerd
@@ -13,6 +15,11 @@ supervisor=supervise-daemon
 respawn_delay=2
 output_logger="logger -t mica-containerd -p daemon.info"
 error_logger="logger -t mica-containerd -p daemon.err"
+REQUIRE_MOUNT=${MICA_REQUIRE_MOUNT:-/usr/lib/mica/mica-require-mount}
+
+start_pre() {
+    "${REQUIRE_MOUNT}" /mica/containers/storage
+}
 
 stop_post() {
     yesno "${RC_GOINGDOWN}" || return 0
@@ -24,6 +31,6 @@ stop_post() {
 # No network ordering: a device may run offline, and its containers start without
 # the network.
 depend() {
-    need mica-mounts
+    need mica-mounts mica-fstab
     use logger
 }

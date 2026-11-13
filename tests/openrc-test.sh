@@ -3,6 +3,8 @@
 # stubbed and a podman that records its calls: a plain stop of the service leaves the
 # containers running (a restarted daemon adopts them), and a stop while the system
 # goes down stops them after the supervisor, so nothing holds DATA at poweroff.
+# The start checks the engine root with mica-require-mount (a stub here) and is
+# refused when it says so; the service needs mica-fstab.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 REPO_ROOT=$PWD
@@ -34,6 +36,37 @@ stop_hook YES
 if grep -c "^podman stop --all " "$TMP/calls" >/dev/null 2>&1; then
     pass "O2 a stop while the system goes down stops every container"
 else fail "O2 calls: $(cat "$TMP/calls" 2>/dev/null)"; fi
+
+# start_hook <helper exit code>: the service's start_pre, with mica-require-mount
+# replaced by a stub that records its arguments, writes to stderr and exits so.
+start_hook() {
+    rm -f "$TMP/calls"
+    printf '#!/bin/sh\necho "require $*" >>"%s/calls"\necho "stub: not mounted" >&2\nexit %s\n' "$TMP" "$1" >"$TMP/bin/require-mount"
+    chmod +x "$TMP/bin/require-mount"
+    RC=0
+    OUT=$(MICA_REQUIRE_MOUNT="$TMP/bin/require-mount" sh -c '
+        . "$0"
+        start_pre' "$REPO_ROOT/deb/mica-containerd.openrc" 2>&1) || RC=$?
+}
+
+start_hook 0
+if [ "$RC" -eq 0 ] && [ "$(cat "$TMP/calls")" = "require /mica/containers/storage" ]; then
+    pass "O3 the start checks the engine root /mica/containers/storage and goes on when it may"
+else fail "O3 rc=$RC calls: $(cat "$TMP/calls" 2>/dev/null)"; fi
+
+start_hook 1
+if [ "$RC" -ne 0 ] && [ "$OUT" = "stub: not mounted" ]; then
+    pass "O4 a user's engine root that is not mounted refuses the start, and the reason reaches the log"
+else fail "O4 rc=$RC: $OUT"; fi
+
+deps=$(sh -c '
+    need() { echo "need $*"; }
+    use() { echo "use $*"; }
+    . "$0"
+    depend' "$REPO_ROOT/deb/mica-containerd.openrc")
+if printf '%s\n' "$deps" | grep -Ec '^need( [^ ]+)* mica-fstab( |$)' >/dev/null; then
+    pass "O5 the service needs mica-fstab, so the user's mounts come first"
+else fail "O5 depend: $deps"; fi
 
 echo "RESULT: $FAIL_N failed, $PASS_N passed"
 [ "$FAIL_N" -eq 0 ]
