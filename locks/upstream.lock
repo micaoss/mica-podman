@@ -80,4 +80,4 @@ git	catatonit	https://github.com/openSUSE/catatonit.git	v0.2.1	bb3b96b99668e5446
 git	conmon	https://github.com/containers/conmon.git	v2.2.1	c8cc2c4db27531bd4e084ce7857f73cd21ee639d
 git	crun	https://github.com/containers/crun.git	1.30.1	079ff6a7a16d029460af882f9ea44674e6a510b6
 git	netavark	https://github.com/containers/netavark.git	v2.1.0	8e91ad1d947ed325327b638f0cb906bea1f7d0ab
-git	podman	https://github.com/containers/podman.git	v6.1.4	464c15fec06f0074c916f9eff87c4806869c2833
+git	podman	https://github.com/containers/podman.git	v6.2.0	055de046937d29450f310fce0fe3071485d8bed9

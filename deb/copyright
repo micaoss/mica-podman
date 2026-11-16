@@ -15,7 +15,7 @@ Comment: The /etc/containers configuration, and mica-containerd's start-up
 Files: usr/bin/podman
 Copyright: The containers/podman authors
 License: Apache-2.0
-Comment: containers/podman v6.1.4.
+Comment: containers/podman v6.2.0.
 
 Files: usr/bin/crun
 Copyright: Giuseppe Scrivano and the crun authors
