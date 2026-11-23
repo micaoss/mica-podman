@@ -1,6 +1,6 @@
 Package: mica-podman
-Version: 6.2.0-1
-Source-Date-Epoch: 1794844020
+Version: 6.2.0-2
+Source-Date-Epoch: 1795457340
 Architecture: @ARCH@
 Maintainer: Mica OS <hi@micaos.dev>
 Section: admin
@@ -8,7 +8,7 @@ Priority: optional
 Conflicts: mica-docker
 Depends: mica-system, mica-systemd | mica-openrc (>= 0.56-mica19), nftables, libc6 (>= 2.39), libcap2 (>= 1:2.10), libgcc-s1 (>= 4.2), libglib2.0-0t64 (>= 2.76.0), libjson-c5 (>= 0.15), libseccomp2 (>= 2.6.0), libsubid5 (>= 1:4.16.0), libsystemd0 (>= 246)
 Description: Mica OS container engine
- podman 6.2.0, crun 1.30.1, conmon 2.2.1, netavark and aardvark-dns 2.1.0 and
+ podman 6.2.0, crun 1.31, conmon 2.2.1, netavark and aardvark-dns 2.1.0 and
  catatonit 0.2.1, built from pinned upstream source, with mica-containerd,
  the supervisor that runs the declared containers through its API on systemd
  and OpenRC alike, and the /etc/containers configuration. /usr/bin/docker is

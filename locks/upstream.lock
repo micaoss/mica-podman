@@ -78,6 +78,6 @@ source	zlib1g-dev	arm64	1:1.3.dfsg+really1.3.1-1+b1	745ebcf1fa115e230af76216355d
 git	aardvark-dns	https://github.com/containers/aardvark-dns.git	v2.1.0	cd7417681229219059939bdd9f0b3bd9ac9abb08
 git	catatonit	https://github.com/openSUSE/catatonit.git	v0.2.1	bb3b96b99668e544618c5aec427c1f4b6b9ee9bb
 git	conmon	https://github.com/containers/conmon.git	v2.2.1	c8cc2c4db27531bd4e084ce7857f73cd21ee639d
-git	crun	https://github.com/containers/crun.git	1.30.1	079ff6a7a16d029460af882f9ea44674e6a510b6
+git	crun	https://github.com/containers/crun.git	1.31	a84965e1278d08d6c75d5b8a41a3e72a7a11fa5b
 git	netavark	https://github.com/containers/netavark.git	v2.1.0	8e91ad1d947ed325327b638f0cb906bea1f7d0ab
 git	podman	https://github.com/containers/podman.git	v6.2.0	055de046937d29450f310fce0fe3071485d8bed9

@@ -20,7 +20,7 @@ Comment: containers/podman v6.2.0.
 Files: usr/bin/crun
 Copyright: Giuseppe Scrivano and the crun authors
 License: GPL-2.0-or-later
-Comment: crun 1.30.1. The linked src/libcrun is LGPL-2.1-or-later, carried
+Comment: crun 1.31. The linked src/libcrun is LGPL-2.1-or-later, carried
  below; the combined binary is distributed under GPL-2.0-or-later.
 
 Files: usr/libexec/podman/conmon
